@@ -103,7 +103,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin, onRegister }) => {
               <label className="text-xs text-slate-400 mb-1 block">Email</label>
               <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl px-3">
                 <Mail className="w-4 h-4 text-slate-500" />
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full bg-transparent p-2.5 text-sm focus:outline-none" placeholder="you@example.com" />
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" className="w-full bg-transparent p-2.5 text-sm focus:outline-none" placeholder="you@example.com" />
               </div>
             </div>
             <div>

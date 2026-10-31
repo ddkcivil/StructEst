@@ -1,6 +1,0 @@
-{
-  "summary": "Plan to refine the Drawing Import & Take-Off Simulator, including removing duplicate tabs, enhancing material/settings, relocating parameters, adding user/blueprint controls, and refining the DXF Geometry Layer Inspector.",
-  "updatedAt": "2026-10-20T05:48:06.130700817Z",
-  "requestFeedback": true,
-  "userFacing": true
-}

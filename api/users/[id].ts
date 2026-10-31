@@ -1,8 +1,18 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectDB } from '../_lib/db';
 import { User } from '../_lib/User';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+interface ApiRequest {
+  method?: string;
+  query: Record<string, string | string[] | undefined>;
+  body: any;
+}
+
+interface ApiResponse {
+  status(code: number): this;
+  json(body: unknown): this;
+}
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   await connectDB();
   const { id } = req.query;
   if (req.method === 'PUT') {

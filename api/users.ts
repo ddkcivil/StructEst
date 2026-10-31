@@ -1,4 +1,8 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+type VercelRequest = { method?: string; body: any };
+type VercelResponse = {
+  json(body: any): VercelResponse;
+  status(code: number): VercelResponse;
+};
 import { connectDB } from './_lib/db';
 import { User } from './_lib/User';
 

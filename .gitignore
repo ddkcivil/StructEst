@@ -1,0 +1,15 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# compiled server bundle emitted by `npm run build`
+server.js
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md

@@ -1,0 +1,272 @@
+import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Layers, FileText, Calculator, ShieldCheck, Settings, Building2, DollarSign, Download, Upload, Plus, Trash2, Edit3, CheckCircle, AlertTriangle, RefreshCw, Sparkles, Printer } from 'lucide-react';
+import { BlueprintCanvasOverlay } from './components/BlueprintCanvasOverlay';
+import { MaterialsLibrary } from './components/MaterialsLibrary';
+import { NbcMunicipalCompliance } from './components/NbcMunicipalCompliance';
+import { ProjectParameters } from './components/ProjectParameters';
+import { useProjects } from './hooks/useProjects';
+import { useMaterials } from './hooks/useMaterials';
+import { useCadState } from './hooks/useCadState';
+
+// Types and interfaces
+export type MeasurementCategory = 
+  | 'Site Prep'
+  | 'Earthwork'
+  | 'Substructure'
+  | 'Superstructure'
+  | 'Formwork'
+  | 'Reinforcement'
+  | 'Finishing'
+  | 'MEP Works'
+  | 'Civil Works';
+
+export type MeasurementUnit = 'm' | 'm²' | 'm³' | 'kg' | 'pcs' | 'Ls' | 'bag' | 'rft' | 'tons' | 'CuM' | 'SqM' | 'Kg' | 'RM';
+
+export interface SubDivisionLine {
+  id: string;
+  label?: string;
+  description?: string;
+  length: number;
+  width: number;
+  height: number;
+  qty: number;
+}
+
+export interface MeasurementItem {
+  id: string;
+  name?: string;
+  description?: string;
+  category: MeasurementCategory;
+  unit: MeasurementUnit;
+  length: number;
+  width: number;
+  height: number;
+  qty: number;
+  wastagePercent: number;
+  overheadsPercent?: number;
+  unitRate: number;
+  deductionsArea?: number;
+  subDivisions?: SubDivisionLine[];
+  isSavedToBOQ?: boolean;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  client?: string;
+  location?: string;
+  currency?: string;
+  fiscalYear?: string;
+  duration?: string;
+  companyName?: string;
+  companyAddress?: string;
+  preparedBy?: string;
+  checkedBy?: string;
+  approvedBy?: string;
+  standardWallHeight: number;
+  wastageDefault: number;
+  vatPercent: number;
+  contingencyPercent: number;
+  items: MeasurementItem[];
+}
+
+export interface MaterialRate {
+  id: string;
+  name: string;
+  category: string;
+  unit: string;
+  rate: number;
+  supplier?: string;
+  specification?: string;
+  spec?: string;
+}
+
+// Predefined categories
+export const PREDEFINED_CATEGORIES = [
+  { name: 'Site Prep', description: 'Site layout, clearing & preparation', badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
+  { name: 'Earthwork', description: 'Excavation & soil filling in foundations', badgeClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
+  { name: 'Substructure', description: 'Soling & plain cement concrete (PCC)', badgeClass: 'bg-stone-500/10 text-stone-300 border-stone-500/30' },
+  { name: 'Superstructure', description: 'RCC M20 concrete & brick masonry', badgeClass: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
+  { name: 'Formwork', description: 'Centering & shuttering with waterproof plywood', badgeClass: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
+  { name: 'Reinforcement', description: 'Fe 500 TMT steel rebar bending & binding', badgeClass: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' },
+  { name: 'Finishing', description: 'Plaster, paints, tiles, doors, windows & woodwork', badgeClass: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
+  { name: 'MEP Works', description: 'Electrical wiring & sanitary/plumbing works', badgeClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' },
+  { name: 'Civil Works', description: 'General civil works', badgeClass: 'bg-red-500/10 text-red-400 border-red-500/30' },
+];
+
+export default function App() {
+  const { projects, currentProject, currentProjectId, setCurrentProjectId, handleUpdateCurrentProjectItems, handleCreateNewProject, handleDeleteProject, handleUpdateProject } = useProjects();
+  const { materials, setMaterials } = useMaterials();
+  const { 
+    backgroundImage, setBackgroundImage, 
+    measurements, setMeasurements, 
+    calibratedScale, setCalibratedScale,
+    isGridVisible, setIsGridVisible,
+    isSnapping, setIsSnapping,
+    selectedElement, setSelectedElement,
+    zoomLevel, setZoomLevel,
+    selectedLayer, setSelectedLayer,
+    history, setHistory,
+    undoRedoIndex, setUndoRedoIndex
+  } = useCadState();
+
+  const [activeTab, setActiveTab] = useState<'blueprint' | 'boq' | 'materials' | 'nbc' | 'settings'>('blueprint');
+  const [templates, setTemplates] = useState<any[]>([]);
+
+  const handleProjectSelect = (projectId: string) => {
+    setCurrentProjectId(projectId);
+  };
+
+  const handleTabClick = (tab: 'blueprint' | 'boq' | 'materials' | 'nbc' | 'settings') => {
+    setActiveTab(tab);
+  };
+
+  const navbarItems = [
+    { key: 'blueprint', label: 'Blueprint', icon: 'Building2' },
+    { key: 'boq', label: 'BOQ / Takeoff', icon: 'DollarSign' },
+    { key: 'materials', label: 'Materials', icon: 'Sparkles' },
+    { key: 'nbc', label: 'NBC 205', icon: 'ShieldCheck' },
+    { key: 'settings', label: 'Settings', icon: 'Settings' },
+  ];
+return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+    <div className="max-w-7xl mx-auto p-4">
+
+<main className="flex-1 flex flex-col p-6 overflow-auto">
+<header className="flex items-center justify-between mb-6 flex flex-col sm:flex-row gap-4">
+{activeTab === 'blueprint' && (
+            <div className="flex-1 flex flex-col">
+              <BlueprintCanvasOverlay
+                setMeasureme nts={setMeasurements}
+                calibratedScale={calibratedScale}
+                setCalibratedScale={setCalibratedScale}
+                isGridVisible={isGridVisible}
+                setIsGridVisible={setIsGridVisible}
+                isSnapping={isSnapping}
+                setIsSnapping={setIsSnapping}
+                selectedElement={selectedElement}
+                setSelectedElement={setSelectedElement}
+                zoomLevel={zoomLevel}
+                setZoomLevel={setZoomLevel}
+                selectedLayer={selectedLayer}
+                setSelectedLayer={setSelectedLayer}
+                history={history}
+                setHistory={setHistory}
+                undoRedoIndex={undoRedoIndex}
+                setUndoRedoIndex={setUndoRedoIndex}
+                onItemsUpdated={handleUpdateCurrentProjectItems}
+              />
+            </div>
+          )}
+{activeTab === 'boq' && (
+            <div className="max-w-6xl mx-auto w-full space-y-6">
+              <div className="flex justify-between items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
+                <h2 className="text-lg font-semibold">BOQ / Takeoff</h2>
+              </div>
+              {currentProject && currentProject.items.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-max table-auto">
+                    <thead>
+                      <tr className="border-b-2 border-slate-700 bg-slate-950 text-slate-200">
+                        <th className="py-3 px-4 font-medium text-slate-200">Item</th>
+                        <th className="py-3 px-4">Category</th>
+                        <th className="py-3 px-4 text-center">Unit</th>
+                        <th className="py-3 px-4">L &times; W &times; H</th>
+                        <th className="py-3 px-4">Qty</th>
+                        <th className="py-3 px-4">Rate</th>
+                        <th className="py-3 px-4">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentProject.items.map((item, index) => (
+                        <tr key={item.id} className="border-b hover:bg-slate-900">
+                          <td className="py-3 px-4 font-medium text-slate-200">
+                            <div>{item.name || item.description || 'Takeoff Item'}</div>
+                            {item.description && item.name && <div className="text-[11px] text-slate-400 mt-0.5">{item.description}</div>}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase border ${getCategoryBadgeClass(item.category)}`}>
+                              {item.category}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-center font-mono text-slate-300">{item.unit}</td>
+                          <td className="py-3 px-4 text-center font-mono text-slate-300">
+                            {item.length.toFixed(2)} &times; {item.width.toFixed(2)} &times; {item.height.toFixed(2)}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono text-slate-200">{item.qty.toFixed(2)}</td>
+                          <td className="py-3 px-4 text-right font-mono text-slate-300">{item.unitRate.toLocaleString()}</td>
+                          <td className="py-3 px-4 text-right font-mono font-bold text-amber-400">
+                            {(item.qty * item.unitRate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currentProject.currency || 'NPR'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    {currentProject.items.length > 0 && (
+                      <tfoot>
+                        <tr className="border-t-2 border-slate-700 bg-slate-950 font-bold text-slate-100">
+                          <td colSpan={6} className="py-4 px-4 text-right">Total Estimated Cost:</td>
+                          <td className="py-4 px-4 text-right font-mono text-amber-400 text-sm">
+                            {currentProject.items.reduce((acc, item) => acc + (item.qty * item.unitRate), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currentProject.currency || 'NPR'}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              )}
+
+              {!currentProject || currentProject.items.length === 0 && projects.length > 0 && (
+                <div className="py-12 text-center text-slate-500">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-800 mx-auto mb-4 flex items-center justify-center">
+                    <Trash2 className="w-8 h-8 text-slate-500" />
+                  </div>
+                  <p>No takeoff items yet</p>
+                  <p className="text-xs mt-2">Click on the blueprint tab to start measuring</p>
+                </div>
+              )}
+
+              {projects.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-slate-700">
+                  <h3 className="text-sm font-medium text-slate-400 mb-4">Projects</h3>
+                  <div className="space-y-2">
+                    {projects.map(project => (
+                      <div
+                        key={project.id}
+                        onClick={() => handleProjectSelect(project.id)}
+                        className={`px-3 py-2 rounded-lg cursor-pointer transition ${currentProjectId === project.id ? 'bg-amber-500/20 text-amber-400' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'}`}
+                      >
+                        {project.name}
+                        {project.id === currentProjectId && <span className="text-amber-400 font-medium">(current)</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+{activeTab === 'materials' && (
+            <div className="max-w-4xl mx-auto w-full">
+              <MaterialsLibrary />
+            </div>
+          )}
+          {activeTab === 'nbc' && (
+            <NbcMunicipalCompliance />
+          )}
+          {activeTab === 'settings' && (
+            <div className="max-w-4xl mx-auto w-full">
+              <ProjectParameters
+                currentProject={currentProject}
+                setProjects={setProjects}
+                projects={projects}
+                templates={templates}
+                setTemplates={setTemplates}
+              />
+            </div>
+          )}
+          </header>
+        </main>
+      </div>
+    </div>
+  );
+}

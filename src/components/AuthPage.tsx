@@ -125,6 +125,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin, onRegister }) => {
                 </div>
               </div>
             )}
+            {error && <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-2">{error}</p>}
             {success && <p className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-2">{success}</p>}
             <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold py-3 rounded-xl transition flex items-center justify-center space-x-2 shadow-lg disabled:opacity-60">
               <span>{loading ? 'Please wait…' : mode === 'login' ? 'Login' : 'Create Account'}</span>

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build && (tsup server.ts --format esm --out-dir . --clean false || npx esbuild server.ts --platform=node --packages=external --bundle --format=esm --outfile=server.js)",
+    "build": "vite build && npx esbuild server.ts --platform=node --packages=external --bundle --format=esm --outfile=server.js && npx esbuild api/login.ts --platform=node --packages=external --bundle --format=esm --outfile=api/login.js && npx esbuild api/users.ts --platform=node --packages=external --bundle --format=esm --outfile=api/users.js",
     "start": "node server.js",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",

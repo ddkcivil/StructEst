@@ -10,6 +10,10 @@ coverage/
 # compiled server bundle emitted by `npm run build`
 server.js
 
+# compiled API route bundles (prevents .js/.ts path conflicts on Vercel)
+api/*.js
+api/**/*.js
+
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md

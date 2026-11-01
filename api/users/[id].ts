@@ -1,5 +1,5 @@
-import { connectDB } from '../_lib/db';
-import { User } from '../_lib/User';
+import { connectDB } from '../_lib/db.js';
+import { User } from '../_lib/User.js';
 
 interface ApiRequest {
   method?: string;

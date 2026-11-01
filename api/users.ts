@@ -3,8 +3,8 @@ type VercelResponse = {
   json(body: any): VercelResponse;
   status(code: number): VercelResponse;
 };
-import { connectDB } from './_lib/db';
-import { User } from './_lib/User';
+import { connectDB } from './_lib/db.js';
+import { User } from './_lib/User.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   await connectDB();

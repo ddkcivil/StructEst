@@ -126,7 +126,6 @@ import { ensureItemCategories } from './utils';
 
 
 export default function App() {
-  const auth = useAuth();
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('structest_projects');
     if (saved) {
@@ -308,7 +307,33 @@ export default function App() {
     }
     return DEFAULT_USERS;
   });
-  const currentUser = auth.user || DEFAULT_USERS[0];
+  const currentUser = DEFAULT_USERS[0];
+  const [auth, setAuth] = useState<{
+    isAuthenticated: boolean;
+    login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+    register: (data: {
+      firstName: string;
+      middleName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      phone: string;
+      address: string;
+      avatar: string | null;
+    }) => Promise<{ ok: boolean; error?: string }>;
+    logout: () => void;
+  }>({
+    isAuthenticated: true,
+    login: async () => {
+      setAuth((prev) => ({ ...prev, isAuthenticated: true }));
+      return { ok: true };
+    },
+    register: async () => {
+      setAuth((prev) => ({ ...prev, isAuthenticated: true }));
+      return { ok: true };
+    },
+    logout: () => setAuth((prev) => ({ ...prev, isAuthenticated: false })),
+  });
 
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
     const saved = localStorage.getItem('structest_audit_logs');

@@ -67,7 +67,9 @@ import { DxfLayerDistributionChart } from './components/DxfLayerDistributionChar
 import { NbcMunicipalCompliance } from './components/NbcMunicipalCompliance';
 import { DEFAULT_BOQ_TERMS } from './components/takeoff/terms';
 import { AuthPage } from './components/AuthPage';
-import { useAuth } from './hooks/useAuth';
+import { CadImporter } from './components/App/CadImporter';
+import { ProjectList } from './components/App/ProjectList';
+import { AuditLog } from './components/App/AuditLog';
 import { CadLineweightLegend } from './components/CadLineweightLegend';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -3826,7 +3828,7 @@ EOF`;
                     {/* Lineweight & Scale Calibration Controls */}
                     <CadLineweightLegend
                       scalePreset={cadScalePreset}
-                      onScalePresetChange={(preset) => {
+                      onScalePresetChange={(preset: string) => {
                         setCadScalePreset(preset);
                         if (preset === '1:50') setCadScaleFactor(0.5);
                         else if (preset === '1:100') setCadScaleFactor(1.0);
@@ -5841,3 +5843,7 @@ EOF`;
     </div>
   );
 }
+function useAuth() {
+  throw new Error('Function not implemented.');
+}
+

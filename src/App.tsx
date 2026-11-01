@@ -72,110 +72,53 @@ import { CadLineweightLegend } from './components/CadLineweightLegend';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-// AI CAD Takeoff Review item interface
-export interface StagedCadTakeoffItem extends MeasurementItem {
-  selected: boolean;
-  cadSourceLayer: string;
-  confidenceScore: number;
-  deductionNotes?: string;
-}
+import {
+  StagedCadTakeoffItem,
+  MeasurementItem,
+  MeasurementCategory,
+  UserRole,
+  UserProfile,
+  AuditLogEntry,
+  Project,
+  ProjectTemplate,
+  MaterialRate,
+  SubDivisionLine,
+  BOQCategory,
+  PredefinedCategoryInfo,
+  UserPermissions,
+  PREDEFINED_CATEGORIES,
+  DEFAULT_CATEGORY_MAPPINGS,
+  DEFAULT_USERS,
+  DEFAULT_AUDIT_LOGS,
+  getCategoryBadgeClass,
+} from './types';
 
-// Types
-export enum BOQCategory {
-  SITE_PREP = 'Site Prep',
-  EARTHWORK = 'Earthwork',
-  SUBSTRUCTURE = 'Substructure',
-  SUPERSTRUCTURE = 'Superstructure',
-  FORMWORK = 'Formwork',
-  REINFORCEMENT = 'Reinforcement',
-  FINISHING = 'Finishing',
-  MEP_WORKS = 'MEP Works',
-  CIVIL_WORKS = 'Civil Works',
-  FINISHES_MEP = 'Finishes & MEP',
-}
+// Re-export all types for backward compatibility with existing imports from App
+export type {
+  StagedCadTakeoffItem,
+  MeasurementItem,
+  MeasurementCategory,
+  UserRole,
+  UserProfile,
+  AuditLogEntry,
+  Project,
+  ProjectTemplate,
+  MaterialRate,
+  SubDivisionLine,
+  BOQCategory,
+  PredefinedCategoryInfo,
+  UserPermissions,
+} from './types';
 
-export type MeasurementCategory =
-  | 'Site Prep'
-  | 'Earthwork'
-  | 'Substructure'
-  | 'Superstructure'
-  | 'Formwork'
-  | 'Reinforcement'
-  | 'Finishing'
-  | 'MEP Works'
-  | 'Civil Works'
-  | 'Finishes & MEP';
+export {
+  PREDEFINED_CATEGORIES,
+  DEFAULT_CATEGORY_MAPPINGS,
+  DEFAULT_USERS,
+  DEFAULT_AUDIT_LOGS,
+  getCategoryBadgeClass,
+} from './types';
 
-export interface PredefinedCategoryInfo {
-  name: MeasurementCategory;
-  description: string;
-  badgeClass: string;
-}
-
-export const PREDEFINED_CATEGORIES: PredefinedCategoryInfo[] = [
-  { name: 'Site Prep', description: 'Site layout, clearing & preparation', badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
-  { name: 'Earthwork', description: 'Excavation & soil filling in foundations', badgeClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
-  { name: 'Substructure', description: 'Soling & plain cement concrete (PCC)', badgeClass: 'bg-stone-500/10 text-stone-300 border-stone-500/30' },
-  { name: 'Superstructure', description: 'RCC M20 concrete & brick masonry', badgeClass: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
-  { name: 'Formwork', description: 'Centering & shuttering with waterproof plywood', badgeClass: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
-  { name: 'Reinforcement', description: 'Fe 500 TMT steel rebar bending & binding', badgeClass: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' },
-  { name: 'Finishing', description: 'Plaster, paints, tiles, doors, windows & woodwork', badgeClass: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
-  { name: 'MEP Works', description: 'Electrical wiring & sanitary/plumbing works', badgeClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' },
-  { name: 'Civil Works', description: 'General civil engineering & miscellaneous', badgeClass: 'bg-slate-500/10 text-slate-300 border-slate-500/30' },
-];
-
-export const getCategoryBadgeClass = (cat: MeasurementCategory | string) => {
-  switch (cat) {
-    case 'Site Prep':
-      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-    case 'Earthwork':
-      return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-    case 'Substructure':
-      return 'bg-stone-500/10 text-stone-300 border-stone-500/30';
-    case 'Superstructure':
-      return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
-    case 'Formwork':
-      return 'bg-orange-500/10 text-orange-400 border-orange-500/30';
-    case 'Reinforcement':
-      return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30';
-    case 'Finishing':
-      return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
-    case 'MEP Works':
-      return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
-    case 'Civil Works':
-    case 'Finishes & MEP':
-    default:
-      return 'bg-slate-800 text-slate-300 border-slate-700';
-  }
-};
-
-export const DEFAULT_CATEGORY_MAPPINGS: Record<string, MeasurementCategory> = {
-  'item-1': 'Site Prep',
-  'item-2': 'Earthwork',
-  'item-3': 'Earthwork',
-  'item-4': 'Substructure',
-  'item-5': 'Substructure',
-  'item-6': 'Superstructure',
-  'item-7': 'Reinforcement',
-  'item-8': 'Formwork',
-  'item-9': 'Superstructure',
-  'item-10': 'Finishing',
-  'item-11': 'Finishing',
-  'item-12': 'Finishing',
-  'item-13': 'Finishing',
-  'item-14': 'Finishing',
-  'item-15': 'Finishing',
-  'item-16': 'MEP Works',
-  'item-17': 'MEP Works',
-  'item-18': 'Finishing',
-  'item-19': 'Finishing',
-  'item-20': 'Finishing',
-  'item-21': 'Finishing',
-  'item-22': 'Finishing',
-  'item-23': 'Finishing',
-};
-
-export function ensureItemCategories(projectsList: Project[]): Project[] {
+function ensureItemCategories(projectsList: Project[]): Project[] {
   return projectsList.map(proj => ({
     ...proj,
     items: proj.items.map(item => {
@@ -183,7 +126,6 @@ export function ensureItemCategories(projectsList: Project[]): Project[] {
       if ((updatedItem.category === 'Civil Works' || !updatedItem.category) && DEFAULT_CATEGORY_MAPPINGS[updatedItem.id]) {
         updatedItem.category = DEFAULT_CATEGORY_MAPPINGS[updatedItem.id];
       }
-      // Populate standard PDF subdivisions for initial items if not yet present
       if (!updatedItem.subDivisions || updatedItem.subDivisions.length === 0) {
         if (updatedItem.id === 'item-2') {
           updatedItem.subDivisions = [
@@ -203,209 +145,7 @@ export function ensureItemCategories(projectsList: Project[]): Project[] {
       return updatedItem;
     })
   }));
-}
-
-export interface SubDivisionLine {
-  id: string;
-  description: string; // e.g. "Foundation Trench Excavation", "Ground Floor - Partition Walls"
-  qty: number;         // Nos / multiplier (can be negative for deductions)
-  length: number;      // L (meters)
-  width: number;       // W (meters)
-  height: number;      // H (meters)
-}
-
-export interface MeasurementItem {
-  id: string;
-  category: MeasurementCategory;
-  description: string;
-  unit: 'm³' | 'm²' | 'm' | 'rft' | 'pcs' | 'kg' | 'bags' | 'tons';
-  length: number;
-  width: number;
-  height: number;
-  qty: number;
-  wastagePercent: number; // e.g. 5%
-  unitRate: number;
-  deductionsArea?: number; // for openings like windows/doors in brickwork/plaster
-  subDivisions?: SubDivisionLine[]; // granular take-off measurement sheet subdivisions
-  floor?: 'Foundation' | 'Ground Floor' | '1st Floor' | '2nd Floor' | 'Roof' | string; // Multi-story floor assignment
-}
-
-export interface MaterialRate {
-  id: string;
-  name: string;
-  category: 'Cement & Concrete' | 'Steel & Rebar' | 'Bricks & Masonry' | 'Aggregates & Sand' | 'Formwork & Timber' | 'Finishing & Tiles' | 'Finishing & Paints' | 'Plumbing & MEP' | 'Labor' | string;
-  unit: string;
-  rate: number;
-  supplier?: string;
-  spec?: string;
-}
-
-export type UserRole = 'admin' | 'estimator' | 'project_manager' | 'site_engineer' | 'client';
-
-export interface UserPermissions {
-  canEditBoq: boolean;
-  canRunAiTakeoff: boolean;
-  canEditRates: boolean;
-  canManageUsers: boolean;
-  canApproveReport: boolean;
-  canExportData: boolean;
-}
-
-export interface UserProfile {
-  id: string;
-  name: string;
-  firstName?: string;
-  middleName?: string;
-  lastName?: string;
-  email: string;
-  password?: string;
-  phone?: string;
-  address?: string;
-  avatar?: string | null;
-  role: UserRole;
-  department: string;
-  status?: 'pending' | 'approved';
-  avatarBg: string;
-  permissions: UserPermissions;
-}
-
-export interface AuditLogEntry {
-  id: string;
-  timestamp: string;
-  userName: string;
-  userRole: UserRole;
-  action: string;
-  details: string;
-}
-
-export interface Project {
-  id: string;
-  name: string;
-  client: string;
-  location: string;
-  currency: string;
-  fiscalYear: string;
-  duration: string;
-  companyName: string;
-  companyAddress: string;
-  preparedBy: string;
-  checkedBy: string;
-  approvedBy: string;
-  standardWallHeight: number; // meters
-  extWallThickness?: number; // meters
-  intWallThickness?: number; // meters
-  discountAmount?: number; // currency
-  measurementStandard?: string; // e.g. DUDBC / IS 1200 / CPWD
-  wastageDefault: number; // %
-  vatPercent: number; // %
-  contingencyPercent: number; // %
-  items: MeasurementItem[];
-  createdAt: string;
-  isArchived?: boolean;
-}
-
-export interface ProjectTemplate {
-  id: string;
-  name: string;
-  companyName: string;
-  companyAddress: string;
-  location: string;
-  currency: string;
-  standardWallHeight: number;
-  wastageDefault: number;
-  vatPercent: number;
-  contingencyPercent: number;
-}
-
-export const DEFAULT_USERS: UserProfile[] = [
-  {
-    id: 'user-1',
-    firstName: 'Dharma',
-    middleName: '',
-    lastName: 'Kunwar',
-    name: 'Dharma Kunwar',
-    email: 'dharmadkunwar20@gmail.com',
-    password: 'ddK@152207',
-    role: 'admin',
-    department: 'Engineering & Project Leadership',
-    avatarBg: 'bg-amber-500 text-slate-950',
-    status: 'approved',
-    permissions: {
-      canEditBoq: true,
-      canRunAiTakeoff: true,
-      canEditRates: true,
-      canManageUsers: true,
-      canApproveReport: true,
-      canExportData: true,
-    }
-  },
-  {
-    id: 'user-2',
-    name: 'Er. Suman Shrestha',
-    email: 'suman.qs@structest.np',
-    role: 'estimator',
-    department: 'Quantity Surveying & Take-Off',
-    avatarBg: 'bg-blue-600 text-white',
-    permissions: {
-      canEditBoq: true,
-      canRunAiTakeoff: true,
-      canEditRates: true,
-      canManageUsers: false,
-      canApproveReport: false,
-      canExportData: true,
-    }
-  },
-  {
-    id: 'user-3',
-    name: 'Er. Ramesh Adhikari',
-    email: 'ramesh.pm@structest.np',
-    role: 'project_manager',
-    department: 'Project Management & Contracts',
-    avatarBg: 'bg-emerald-600 text-white',
-    permissions: {
-      canEditBoq: true,
-      canRunAiTakeoff: false,
-      canEditRates: true,
-      canManageUsers: false,
-      canApproveReport: true,
-      canExportData: true,
-    }
-  },
-  {
-    id: 'user-4',
-    name: 'Sita Thapa',
-    email: 'sita.site@structest.np',
-    role: 'site_engineer',
-    department: 'Site Execution & Quality Control',
-    avatarBg: 'bg-purple-600 text-white',
-    permissions: {
-      canEditBoq: false,
-      canRunAiTakeoff: false,
-      canEditRates: false,
-      canManageUsers: false,
-      canApproveReport: false,
-      canExportData: false,
-    }
-  },
-  {
-    id: 'user-5',
-    name: 'Apex Holdings (Client Auditor)',
-    email: 'auditor@apexholdings.np',
-    role: 'client',
-    department: 'Client Representative & Audit',
-    avatarBg: 'bg-stone-600 text-white',
-    permissions: {
-      canEditBoq: false,
-      canRunAiTakeoff: false,
-      canEditRates: false,
-      canManageUsers: false,
-      canApproveReport: false,
-      canExportData: true,
-    }
-  }
-];
-
-export const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [];
+};
 
 const DEFAULT_MATERIALS: MaterialRate[] = [];
 
@@ -619,8 +359,7 @@ export default function App() {
     }
     return DEFAULT_USERS;
   });
-  const [currentUserId, setCurrentUserId] = useState<string>(users[0]?.id || 'user-1');
-  const currentUser = users.find(u => u.id === currentUserId) || users[0] || DEFAULT_USERS[0];
+  const currentUser = auth.user || DEFAULT_USERS[0];
 
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(() => {
     const saved = localStorage.getItem('structest_audit_logs');
@@ -1277,6 +1016,43 @@ EOF`;
       setCadWallHeight(currentProject.standardWallHeight || 3.0);
     } catch (err: any) {
       alert('Error parsing DXF file: ' + err.message);
+    }
+  };
+
+  const handleParsePdfContent = (buffer: ArrayBuffer, fileName: string) => {
+    try {
+      const uint8 = new Uint8Array(buffer);
+      // Try PDF vector takeoff first
+      const pdfResult = (window as any).pdfVectorTakeoff
+        ? (window as any).pdfVectorTakeoff(uint8)
+        : null;
+
+      if (pdfResult && pdfResult.entities && pdfResult.entities.length > 0) {
+        const layersSet = new Set<string>();
+        pdfResult.entities.forEach((entity: any) => {
+          if (entity.layer) layersSet.add(entity.layer);
+        });
+        const layers = Array.from(layersSet) as string[];
+        setDxfLayers(layers);
+        setParsedDxf(pdfResult);
+        setCadTakeoffSuccessMessage(`PDF parsed: ${pdfResult.entities.length} entities from ${fileName}`);
+        setCadTakeoffError(null);
+      } else {
+        // Fallback: try PDF dimension miner for text-based extraction
+        const dimResult = (window as any).pdfDimensionMiner
+          ? (window as any).pdfDimensionMiner(uint8)
+          : null;
+
+        if (dimResult && dimResult.dimensions && dimResult.dimensions.length > 0) {
+          setCadTakeoffSuccessMessage(`PDF parsed: ${dimResult.dimensions.length} dimensions found in ${fileName}`);
+          setCadTakeoffError(null);
+          setParsedDxf(null);
+        } else {
+          alert('Could not extract usable geometry from PDF file.');
+        }
+      }
+    } catch (err: any) {
+      alert('Error parsing PDF file: ' + err.message);
     }
   };
 
@@ -2296,31 +2072,33 @@ EOF`;
               </button>
             </div>
 
-            {/* Quick Active User Persona Switcher */}
+            {/* Logged-in User Header (Avatar + Logout) */}
             <div className="flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
-              <div className={`w-5 h-5 rounded-md ${currentUser.avatarBg} flex items-center justify-center font-bold text-[10px]`}>
-                {currentUser.name.charAt(0)}
+              <div className="relative">
+                {currentUser.avatar ? (
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="w-6 h-6 rounded-full border border-slate-600 object-cover"
+                  />
+                ) : (
+                  <div className={`w-6 h-6 rounded-full ${currentUser.avatarBg} flex items-center justify-center font-bold text-[10px]`}>
+                    {currentUser.name.charAt(0)}
+                  </div>
+                )}
+                <span className="absolute -right-1 -bottom-1 w-2 h-2 rounded-full bg-emerald-500 border-2 border-slate-900 ring-2 ring-slate-950" />
               </div>
               <div className="text-left hidden lg:block">
                 <p className="text-[11px] font-bold text-slate-200 leading-none truncate max-w-[110px]">{currentUser.name}</p>
                 <p className="text-[9px] uppercase tracking-wider font-semibold text-amber-400">{currentUser.role.replace('_', ' ')}</p>
               </div>
-              <select
-                value={currentUserId}
-                onChange={(e) => {
-                  setCurrentUserId(e.target.value);
-                  const u = users.find(x => x.id === e.target.value);
-                  if (u) logActivity('Switched Persona', `Switched active persona to ${u.name} (${u.role.toUpperCase()})`);
-                }}
-                className="bg-transparent text-xs text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
-                title="Switch Active Persona"
+              <button
+                onClick={() => { auth.logout(); window.location.reload(); }}
+                className="text-xs text-slate-400 hover:text-slate-200 font-bold px-2 py-1 transition"
+                title="Logout"
               >
-                {users.map(u => (
-                  <option key={u.id} value={u.id} className="bg-slate-900 text-slate-100">
-                    {u.name} ({u.role.toUpperCase()})
-                  </option>
-                ))}
-              </select>
+                Logout
+              </button>
             </div>
 
             <button
@@ -2723,7 +2501,7 @@ EOF`;
                             <UserCheck className="w-4 h-4 inline" />
                           </button>
                         )}
-                        {currentUser.role === 'admin' && u.id !== currentUserId && (
+                        {currentUser.role === 'admin' && u.id !== currentUser.id && (
                           <button
                             onClick={() => setUsers(prev => prev.filter(x => x.id !== u.id))}
                             className="text-red-400 hover:text-red-300 transition"
@@ -3028,61 +2806,86 @@ EOF`;
 
         {activeTab === 'boq' && (
           <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg">
-              <div>
-                <h2 className="text-lg font-bold text-slate-100">Bill of Quantities Summary (23 Items Exact to PDF)</h2>
-                <p className="text-xs text-slate-400">Official summary of costs, rates, and amounts matching G.C. Brothers Engineering estimate.</p>
+            {/* BOQ Header: Project Info + Action Bar */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              <div className="md:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <Building2 className="w-6 h-6 text-amber-500" />
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-100 leading-tight">Bill of Quantities Summary</h2>
+                    <p className="text-xs text-slate-400">Official cost summary matching G.C. Brothers Engineering estimate</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                  <div className="bg-slate-950/50 border border-slate-800/50 rounded-xl p-3">
+                    <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Project</p>
+                    <p className="text-sm font-medium text-slate-200">{currentProject.name}</p>
+                  </div>
+                  <div className="bg-slate-950/50 border border-slate-800/50 rounded-xl p-3">
+                    <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Location</p>
+                    <p className="text-sm font-medium text-slate-200">{currentProject.location}</p>
+                  </div>
+                  <div className="bg-slate-950/50 border border-slate-800/50 rounded-xl p-3">
+                    <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Items</p>
+                    <p className="text-sm font-bold text-amber-400">{currentProject.items.length}</p>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => {
-                    const updated = projects.map(p => {
-                      if (p.id === currentProject.id) {
-                        return {
-                          ...p,
-                          items: p.items.map(item => {
-                            if (DEFAULT_CATEGORY_MAPPINGS[item.id]) {
-                              return { ...item, category: DEFAULT_CATEGORY_MAPPINGS[item.id] };
-                            }
-                            return item;
-                          })
-                        };
-                      }
-                      return p;
-                    });
-                    setProjects(updated);
-                  }}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center space-x-1.5"
-                  title="Re-apply exact categories from project PDF"
-                >
-                  <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Re-sync PDF Categories</span>
-                </button>
-                <button
-                  onClick={handleDownloadCsv}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center space-x-1.5"
-                  title="Download BOQ as CSV"
-                >
-                  <Download className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Download CSV</span>
-                </button>
-                <div className="flex items-center space-x-1">
+
+              <div className="md:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col gap-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <FileSpreadsheet className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</span>
+                </div>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      const updated = projects.map(p => {
+                        if (p.id === currentProject.id) {
+                          return {
+                            ...p,
+                            items: p.items.map(item => {
+                              if (DEFAULT_CATEGORY_MAPPINGS[item.id]) {
+                                return { ...item, category: DEFAULT_CATEGORY_MAPPINGS[item.id] };
+                              }
+                              return item;
+                            })
+                          };
+                        }
+                        return p;
+                      });
+                      setProjects(updated);
+                    }}
+                    className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center justify-center space-x-2"
+                    title="Re-apply exact categories from project PDF"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Re-sync PDF Categories</span>
+                  </button>
+                  <button
+                    onClick={handleDownloadCsv}
+                    className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center justify-center space-x-2"
+                    title="Download BOQ as CSV"
+                  >
+                    <Download className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Download CSV</span>
+                  </button>
                   <button
                     onClick={() => handleBulkExportPdf('en')}
-                    className="bg-amber-600 hover:bg-amber-500 text-slate-950 px-3 py-1.5 rounded-xl text-xs font-bold border border-amber-500 transition flex items-center space-x-1.5"
+                    className="w-full bg-amber-600 hover:bg-amber-500 text-slate-950 px-3 py-2 rounded-xl text-xs font-bold border border-amber-500 transition flex items-center justify-center space-x-2 shadow-sm"
                     title="Export PDF with English (AD) date"
                   >
                     <FileText className="w-3.5 h-3.5" />
                     <span>Export PDF (EN)</span>
                   </button>
-                  </div>
-                <button
-                  onClick={() => handleOpenAddModal()}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-bold transition shadow-md flex items-center space-x-1.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add BOQ Item</span>
-                </button>
+                  <button
+                    onClick={() => handleOpenAddModal()}
+                    className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center space-x-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add BOQ Item</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -3168,100 +2971,209 @@ EOF`;
               })}
             </div>
 
+            {/* Financial Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <DollarSign className="w-4 h-4 text-amber-400" />
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Subtotal</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400">{currentProject.items.filter(i => boqCategoryFilter === 'All' || i.category === boqCategoryFilter).length} items</span>
+                </div>
+                <div className="text-2xl font-black text-slate-100">
+                  {currentProject.currency}{' '}
+                  {(boqCategoryFilter === 'All'
+                    ? subtotalCost
+                    : currentProject.items.filter(i => i.category === boqCategoryFilter).reduce((sum, item) => sum + calculateItemTotalCost(item), 0)
+                  ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <Calculator className="w-4 h-4 text-blue-400" />
+                    <span className="text-[10px] uppercase font-bold text-slate-500">VAT ({currentProject.vatPercent}%)</span>
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-blue-400">
+                  {currentProject.currency}{' '}
+                  {(subtotalCost * currentProject.vatPercent / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <ShieldCheck className="w-4 h-4 text-orange-400" />
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Contingency ({currentProject.contingencyPercent}%)</span>
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-orange-400">
+                  {currentProject.currency}{' '}
+                  {(subtotalCost * currentProject.contingencyPercent / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <X className="w-4 h-4 text-rose-400" />
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Discount</span>
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-rose-400">
+                  - {currentProject.currency}{' '}
+                  {(currentProject.discountAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 shadow-lg ring-1 ring-amber-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="w-4 h-4 text-amber-400" />
+                    <span className="text-[10px] uppercase font-bold text-amber-400">Grand Total</span>
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-amber-400">
+                  {currentProject.currency}{' '}
+                  {(subtotalCost + subtotalCost * currentProject.vatPercent / 100 + subtotalCost * currentProject.contingencyPercent / 100 - (currentProject.discountAmount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </div>
+            </div>
+
             {/* BOQ Summary Table */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-slate-950/80 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      <th className="py-3 px-4">S.N. / Category</th>
-                      <th className="py-3 px-4">Description of Works</th>
-                      <th className="py-3 px-4">Story</th>
-                      <th className="py-3 px-4">Unit</th>
-                      <th className="py-3 px-4 text-center">Quantity</th>
-                      <th className="py-3 px-4 text-right">Rate ({currentProject.currency})</th>
-                      <th className="py-3 px-4 text-right">Amount ({currentProject.currency})</th>
-                      <th className="py-3 px-4 text-center">Actions</th>
+                  <thead className="sticky top-0 z-10 bg-slate-950/90">
+                    <tr className="border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      <th className="py-3.5 px-4 w-20">S.N.</th>
+                      <th className="py-3.5 px-4 w-1/3">Description of Works</th>
+                      <th className="py-3.5 px-4 w-16 text-center">Category</th>
+                      <th className="py-3.5 px-4 w-16 text-center">Story</th>
+                      <th className="py-3.5 px-4 w-12 text-center">Unit</th>
+                      <th className="py-3.5 px-4 w-16 text-right">Quantity</th>
+                      <th className="py-3.5 px-4 w-20 text-right">Rate</th>
+                      <th className="py-3.5 px-4 w-24 text-right">Amount</th>
+                      <th className="py-3.5 px-4 w-16 text-center">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800 text-slate-200">
+                  <tbody className="divide-y divide-slate-800/50 text-slate-200">
                     {currentProject.items
                       .filter(i => (boqCategoryFilter === 'All' || i.category === boqCategoryFilter) &&
                                    (activeStoryFilter === 'All Stories' || getItemFloor(i) === activeStoryFilter))
-                      .map((item) => {
+                      .map((item, idx) => {
                         const totalCost = calculateItemTotalCost(item);
                         const originalIdx = currentProject.items.findIndex(i => i.id === item.id);
                         const story = getItemFloor(item);
+                        const filteredItems = currentProject.items.filter(i => (boqCategoryFilter === 'All' || i.category === boqCategoryFilter) &&
+                                         (activeStoryFilter === 'All Stories' || getItemFloor(i) === activeStoryFilter));
+                        const isFirstInCategory = idx === 0 || filteredItems[idx - 1]?.category !== item.category;
                         return (
-                          <tr key={item.id} className="hover:bg-slate-800/40 transition">
-                            <td className="py-3 px-4">
-                              <div className="flex items-center space-x-2">
-                                <span className="font-mono text-amber-400 font-bold">#{originalIdx + 1}</span>
-                                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${getCategoryBadgeClass(item.category)}`}>
-                                  {item.category}
+                          <>
+                            {isFirstInCategory && (
+                              <tr className="bg-slate-950/50 border-b border-slate-800/50">
+                                <td colSpan={9} className="py-2 px-4">
+                                  <div className="flex items-center space-x-2">
+                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${getCategoryBadgeClass(item.category)}`}>
+                                      {item.category}
+                                    </span>
+                                    <span className="text-xs font-bold text-slate-400 ml-auto">
+                                      {filteredItems.filter(i => i.category === item.category).reduce((sum, it) => sum + calculateItemTotalCost(it), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                            <tr key={item.id} className="hover:bg-slate-800/30 transition group">
+                              <td className="py-3 px-4">
+                                <span className="font-mono text-slate-500 font-bold">#{originalIdx + 1}</span>
+                              </td>
+                              <td className="py-3 px-4 font-medium" title={item.description}>
+                                {item.description}
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className={`text-[10px] bg-slate-950/60 border border-slate-800/50 px-2 py-0.5 rounded font-mono text-amber-300/80 whitespace-nowrap`}>
+                                  {story}
                                 </span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-4 font-medium max-w-md" title={item.description}>
-                              {item.description}
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-[10px] bg-slate-950/80 border border-slate-800 px-2 py-0.5 rounded font-mono text-amber-300/90 whitespace-nowrap">
-                                {story}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-xs font-mono bg-slate-950/40 rounded">{item.unit}</td>
-                            <td className="py-3 px-4 text-center font-mono font-bold">{calculateItemQuantity(item)}</td>
-                            <td className="py-3 px-4 text-right font-mono">{item.unitRate.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                            <td className="py-3 px-4 text-right font-mono font-bold text-slate-100">
-                              {totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </td>
-                          <td className="py-3 px-4 text-center">
-                            <div className="flex items-center justify-center space-x-2">
-                              <button onClick={() => setSelectedBreakdownItem(item)} className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 rounded transition" title="View Breakdown">
-                                <FileText className="w-4 h-4" />
-                              </button>
-                              <button onClick={() => handleOpenAddModal(item)} className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-amber-400 rounded transition" title="Edit Item">
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
+                              </td>
+                              <td className="py-3 px-4 text-xs font-mono text-slate-300">{item.unit}</td>
+                              <td className="py-3 px-4 text-center font-mono font-bold text-slate-200">{calculateItemQuantity(item)}</td>
+                              <td className="py-3 px-4 text-right font-mono text-slate-300">{item.unitRate.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                              <td className="py-3 px-4 text-right font-mono font-bold text-slate-100 group-hover:text-amber-400 transition-colors">
+                                {totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <div className="flex items-center justify-center space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => setSelectedBreakdownItem(item)} className="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-emerald-400 rounded transition" title="View Breakdown">
+                                    <FileText className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button onClick={() => handleOpenAddModal(item)} className="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-amber-400 rounded transition" title="Edit Item">
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          </>
+                        );
                     })}
                   </tbody>
                 </table>
               </div>
 
-              {/* Table Footer Summary matching PDF Page 1 & 4 */}
-              <div className="bg-slate-950 px-6 py-5 border-t border-slate-800 space-y-2 text-sm">
-                <div className="flex justify-between text-slate-400">
-                  <span>
-                    {boqCategoryFilter === 'All'
-                      ? 'A. Civil Works Subtotal (All 23 Items)'
-                      : `${boqCategoryFilter} Phase Subtotal (${currentProject.items.filter(i => i.category === boqCategoryFilter).length} items)`}
-                  </span>
-                  <span className="font-mono text-slate-200 font-bold">
-                    {currentProject.currency}{' '}
-                    {(boqCategoryFilter === 'All'
-                      ? subtotalCost
-                      : currentProject.items.filter(i => i.category === boqCategoryFilter).reduce((sum, item) => sum + calculateItemTotalCost(item), 0)
-                    ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
+              {/* Table Footer Summary */}
+              <div className="bg-slate-950 px-6 py-6 border-t border-slate-800 rounded-b-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
+                    <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Subtotal</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xs font-bold text-slate-400">{currentProject.currency}</span>
+                      <span className="text-xl font-black text-slate-100">
+                        {(boqCategoryFilter === 'All'
+                          ? subtotalCost
+                          : currentProject.items.filter(i => i.category === boqCategoryFilter).reduce((sum, item) => sum + calculateItemTotalCost(item), 0)
+                        ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      {boqCategoryFilter === 'All' ? 'All BOQ Items' : currentProject.items.filter(i => i.category === boqCategoryFilter).length + ' items'}
+                    </p>
+                  </div>
+                  <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
+                    <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Taxes &amp; Charges</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-400">VAT ({currentProject.vatPercent}%)</span>
+                        <span className="font-mono text-blue-400">
+                          {currentProject.currency}{(subtotalCost * currentProject.vatPercent / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-400">Contingency ({currentProject.contingencyPercent}%)</span>
+                        <span className="font-mono text-orange-400">
+                          {currentProject.currency}{(subtotalCost * currentProject.contingencyPercent / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                    <p className="text-[10px] uppercase font-bold text-amber-400 mb-1">Grand Total</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xs font-bold text-slate-400">{currentProject.currency}</span>
+                      <span className="text-2xl font-black text-amber-400">
+                        {(subtotalCost + subtotalCost * currentProject.vatPercent / 100 + subtotalCost * currentProject.contingencyPercent / 100 - (currentProject.discountAmount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-amber-400/70 mt-1 font-bold">Includes discount of {currentProject.currency}{(currentProject.discountAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                  </div>
                 </div>
-                {boqCategoryFilter === 'All' && (
-                  <>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Discount</span>
-                      <span className="font-mono text-rose-400 font-bold">- 10,280.85</span>
-                    </div>
-                    <div className="flex justify-between pt-3 border-t border-slate-800 text-lg font-black text-amber-400">
-                      <span>Net Payable Amount For Bidding (Grand Total)</span>
-                      <span className="font-mono">{currentProject.currency} 6,100,000.00</span>
-                    </div>
-                    <p className="text-xs text-slate-500 pt-1">In words: Sixty One Lakh Only (Exact to G.C. Brothers Engineering Estimate).</p>
-                  </>
-                )}
+                <div className="border-t border-slate-800/50 pt-6">
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Net Payable Amount For Bidding</span>
+                    <span className="text-xl font-black text-slate-100 font-mono">
+                      {currentProject.currency}{(subtotalCost + subtotalCost * currentProject.vatPercent / 100 + subtotalCost * currentProject.contingencyPercent / 100 - (currentProject.discountAmount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500">Exact to G.C. Brothers Engineering Estimate · Prepared for tender submission</p>
+                </div>
               </div>
             </div>
           </div>
@@ -3801,17 +3713,22 @@ EOF`;
                     <span>Upload Drawing File</span>
                     <input
                       type="file"
-                      accept=".png,.jpg,.jpeg"
+                      accept=".png,.jpg,.jpeg,.dxf,.pdf"
                       className="hidden"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
 
                         const ext = file.name.toLowerCase().split('.').pop();
-                        if (ext !== 'png' && ext !== 'jpg' && ext !== 'jpeg') {
-                          setImportError(`Unsupported file type: ${file.name}. Only JPG and PNG images are allowed.`);
+                        const isImage = ext === 'png' || ext === 'jpg' || ext === 'jpeg';
+                        const isDxf = ext === 'dxf';
+                        const isPdf = ext === 'pdf';
+
+                        if (!isImage && !isDxf && !isPdf) {
+                          setImportError(`Unsupported file type: ${file.name}. Supported: JPG, PNG, DXF, PDF.`);
                           setImportedFileName(null);
                           setImportedFilePreview(null);
+                          setParsedDxf(null);
                           e.target.value = '';
                           return;
                         }
@@ -3819,11 +3736,30 @@ EOF`;
                         setImportError(null);
                         setImportedFileName(file.name);
                         const reader = new FileReader();
-                        reader.onload = (uploadEvent) => {
-                          setImportedFilePreview(uploadEvent.target?.result as string);
-                          setParsedDxf(null);
-                        };
-                        reader.readAsDataURL(file);
+
+                        if (isImage) {
+                          reader.onload = (uploadEvent) => {
+                            setImportedFilePreview(uploadEvent.target?.result as string);
+                            setParsedDxf(null);
+                          };
+                          reader.readAsDataURL(file);
+                        } else if (isDxf) {
+                          reader.onload = (uploadEvent) => {
+                            const text = uploadEvent.target?.result as string;
+                            setImportedFilePreview(null);
+                            setParsedDxf(null);
+                            handleParseDxfContent(text);
+                          };
+                          reader.readAsText(file);
+                        } else if (isPdf) {
+                          reader.onload = (uploadEvent) => {
+                            const buffer = uploadEvent.target?.result as ArrayBuffer;
+                            setImportedFilePreview(null);
+                            setParsedDxf(null);
+                            handleParsePdfContent(buffer, file.name);
+                          };
+                          reader.readAsArrayBuffer(file);
+                        }
                       }}
                     />
                   </label>

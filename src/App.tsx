@@ -438,9 +438,6 @@ const INITIAL_PROJECTS: Project[] = [BLANK_PROJECT];
 
 export default function App() {
   const auth = useAuth();
-  if (!auth.isAuthenticated) {
-    return <AuthPage onLogin={auth.login} onRegister={auth.register} />;
-  }
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('structest_projects');
     if (saved) {
@@ -2180,6 +2177,10 @@ EOF`;
   };
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  if (!auth.isAuthenticated) {
+    return <AuthPage onLogin={auth.login} onRegister={auth.register} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans selection:bg-amber-500 selection:text-slate-950">

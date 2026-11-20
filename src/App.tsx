@@ -1934,48 +1934,79 @@ EOF`;
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans selection:bg-amber-500 selection:text-slate-950">
       {/* Collapsible Sidebar */}
-      <aside className={`print:hidden bg-slate-900 border-r border-slate-800 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col`}>
-        <div className="p-4 flex items-center justify-between border-b border-slate-800">
-          {isSidebarOpen && <h1 className="text-lg font-black text-white">StructEst Pro</h1>}
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-400 hover:text-white">
-            <Layers className="w-5 h-5" />
+      <aside className={`print:hidden bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/70 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col`}>
+        {/* Brand area */}
+        <div className="p-4 flex items-center justify-between border-b border-slate-800/60">
+          {isSidebarOpen ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-1.5 rounded-lg shadow-lg flex-shrink-0">
+                <Layers className="w-4 h-4 text-slate-950" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-sm font-black text-white leading-none truncate">StructEst Pro</h1>
+                <p className="text-[9px] text-amber-400/80 font-medium tracking-wide mt-0.5">Estimation Suite</p>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-1.5 rounded-lg shadow-lg mx-auto">
+              <Layers className="w-4 h-4 text-slate-950" />
+            </div>
+          )}
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800/60 rounded-lg transition flex-shrink-0">
+            <Layers className="w-4 h-4" />
           </button>
         </div>
-        <nav className="flex-1 p-2 space-y-1">
+        {/* Gradient separator */}
+        <div className="h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent mx-4" />
+        <nav className="flex-1 p-2 space-y-0.5">
           {[
-            { id: 'boq', label: 'BOQ Summary', icon: FileSpreadsheet },
-            { id: 'takeoff', label: 'Take-Off Sheet', icon: Calculator },
-            { id: 'nbc205', label: 'NBC & Municipal Plan', icon: ShieldCheck },
-            { id: 'dashboard', label: 'Dashboard', icon: TrendingUp },
-            { id: 'materials', label: 'Materials Library', icon: Hammer },
-            { id: 'blueprint', label: 'Blueprint & CAD', icon: Compass },
-            { id: 'ai-auditor', label: 'AI Expert', icon: Cpu },
-            { id: 'users', label: 'User & Access', icon: Users, restricted: currentUser.role !== 'admin' },
-            { id: 'settings', label: 'Settings', icon: Wrench, restricted: currentUser.role === 'site_engineer' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                if (tab.restricted) {
-                  alert('You do not have permission to access this tab.');
-                  return;
-                }
-                setActiveTab(tab.id as any);
-              }}
-              className={`w-full flex items-center p-3 rounded-xl transition ${
-                activeTab === tab.id ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-              }`}
-            >
-              <tab.icon className="w-5 h-5 flex-shrink-0" />
-              {isSidebarOpen && <span className="ml-3 text-sm">{tab.label}</span>}
-            </button>
-          ))}
+            { id: 'boq',        label: 'BOQ Summary',        icon: FileSpreadsheet, dot: 'bg-blue-500' },
+            { id: 'takeoff',    label: 'Take-Off Sheet',     icon: Calculator,      dot: 'bg-emerald-500' },
+            { id: 'nbc205',     label: 'NBC & Municipal Plan',icon: ShieldCheck,    dot: 'bg-violet-500' },
+            { id: 'dashboard',  label: 'Dashboard',          icon: TrendingUp,      dot: 'bg-sky-500' },
+            { id: 'materials',  label: 'Materials Library',  icon: Hammer,          dot: 'bg-orange-500' },
+            { id: 'blueprint',  label: 'Blueprint & CAD',    icon: Compass,         dot: 'bg-amber-500' },
+            { id: 'ai-auditor', label: 'AI Expert',          icon: Cpu,             dot: 'bg-rose-500' },
+            { id: 'users',      label: 'User & Access',      icon: Users,           dot: 'bg-slate-400', restricted: currentUser.role !== 'admin' },
+            { id: 'settings',   label: 'Settings',           icon: Wrench,          dot: 'bg-gray-500', restricted: currentUser.role === 'site_engineer' },
+          ].map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  if (tab.restricted) {
+                    alert('You do not have permission to access this tab.');
+                    return;
+                  }
+                  setActiveTab(tab.id as any);
+                }}
+                className={`w-full flex items-center p-3 rounded-xl transition-all duration-150 relative overflow-hidden ${
+                  isActive
+                    ? 'border-l-4 border-amber-400 bg-gradient-to-r from-amber-500/20 to-transparent text-amber-300 font-bold pl-2'
+                    : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 hover:translate-x-1 transition-transform duration-150'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${tab.dot} ${isActive ? 'opacity-100' : 'opacity-60'}`} />
+                <tab.icon className="w-5 h-5 flex-shrink-0 ml-1.5" />
+                {isSidebarOpen && <span className="ml-3 text-sm truncate">{tab.label}</span>}
+              </button>
+            );
+          })}
         </nav>
+        {/* Sidebar footer */}
+        {isSidebarOpen && (
+          <div className="p-3 border-t border-slate-800/60 flex items-center justify-between">
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">v1.0</span>
+            <span className="text-[9px] text-slate-500 font-medium">{projects.filter(p => !p.isArchived).length} project{projects.filter(p => !p.isArchived).length !== 1 ? 's' : ''}</span>
+          </div>
+        )}
       </aside>
 
       <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
         {/* Top Header */}
-        <header className="print:hidden bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 shadow-sm sticky top-0 z-20 transition-colors duration-300" style={{ backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.9)' : 'rgba(248, 250, 252, 0.9)' }}>
+        <header className="print:hidden relative backdrop-blur-md bg-slate-900/80 border-b border-slate-800/50 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 shadow-sm sticky top-0 z-20 transition-colors duration-300" style={{ backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(248, 250, 252, 0.85)' }}>
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-amber-500 to-amber-700 p-2 rounded-xl shadow flex items-center justify-center text-slate-950 font-bold">
               <Building2 className="w-5 h-5" />
@@ -1989,7 +2020,7 @@ EOF`;
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+            <div className="flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 ring-1 ring-amber-500/0 focus-within:ring-amber-500/40 transition-all">
               <FolderOpen className="w-4 h-4 text-amber-400" />
               <select
                 value={activeProjectId}
@@ -2046,7 +2077,7 @@ EOF`;
             </div>
 
             {/* Logged-in User Header (Avatar + Logout) */}
-            <div className="flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+            <div className="flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 ring-1 ring-amber-500/0 focus-within:ring-amber-500/40 transition-all">
               <div className="relative">
                 {currentUser.avatar ? (
                   <img
@@ -2081,24 +2112,27 @@ EOF`;
               <Printer className="w-4 h-4 text-amber-400" />
               <span>Print Report</span>
             </button>
-            <button
-              onClick={() => handleRunAiAudit()}
-              className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow transition"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>AI Estimator Audit</span>
-            </button>
+            <div className="relative">
+              <span className="absolute inset-0 rounded-lg animate-pulse bg-amber-500/20 pointer-events-none" />
+              <button
+                onClick={() => handleRunAiAudit()}
+                className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow transition"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>AI Estimator Audit</span>
+              </button>
+            </div>
           </div>
         </header>
 
       {/* Breadcrumb & Project Status Context Bar (De-duplicated UI) */}
-      <div className="print:hidden bg-slate-900/60 border-b border-slate-800/80 px-4 md:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="print:hidden bg-gradient-to-r from-slate-900 to-slate-950 border-b border-slate-800/60 px-4 md:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center space-x-2 text-slate-400">
           <span className="text-slate-500 font-mono text-[10px] tracking-wider uppercase">Workspace</span>
           <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
           <span className="text-slate-200 font-semibold truncate max-w-xs">{currentProject.name}</span>
           <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-          <span className="text-amber-400 font-bold capitalize">
+          <span className="text-amber-400 font-semibold capitalize">
             {activeTab === 'users' ? 'User Management & Access Control' : activeTab.replace('-', ' ')}
           </span>
         </div>

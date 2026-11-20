@@ -3683,6 +3683,7 @@ EOF`;
             materials={materials}
             setMaterials={setMaterials}
             currency={currentProject.currency}
+            addToast={addToast}
           />
         )}
 
@@ -3731,6 +3732,7 @@ EOF`;
                 onUpdateItemToBOQ={() => {}}
                 initialFileName={importedFileName}
                 initialFilePreview={importedFilePreview}
+                addToast={addToast}
               />
             ) : (
               <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg">
@@ -4842,6 +4844,7 @@ EOF`;
                 projects={projects} 
                 templates={templates}
                 setTemplates={setTemplates}
+                addToast={addToast}
               />
 
               <div className="space-y-4 mt-6">

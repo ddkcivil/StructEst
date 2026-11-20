@@ -65,6 +65,7 @@ import {
   hasVectorGeometry,
   type VecPath
 } from './takeoff/pdfVectorTakeoff';
+import { type Toast as ToastType } from './Toast';
 
 /**
  * True when a keyboard event originated from a text-entry control, so global
@@ -175,6 +176,7 @@ interface BlueprintCanvasOverlayProps {
   ) => void;
   initialFileName?: string | null;
   initialFilePreview?: string | null;
+  addToast?: (toast: Omit<ToastType, 'id'>) => void;
 }
 
 // Upload-only drawing intake — real blueprints/PDFs only, no sample drawings.
@@ -199,7 +201,8 @@ export const BlueprintCanvasOverlay: React.FC<BlueprintCanvasOverlayProps> = ({
   onSaveSubdivisionToBOQ,
   onUpdateSubdivisionsToBOQ,
   initialFileName,
-  initialFilePreview
+  initialFilePreview,
+  addToast
 }) => {
   // Canvas refs
   const containerRef = useRef<HTMLDivElement>(null);
@@ -283,7 +286,7 @@ export const BlueprintCanvasOverlay: React.FC<BlueprintCanvasOverlayProps> = ({
     };
     img.onerror = () => {
       console.error('Could not decode drawing source');
-      alert('Could not decode this drawing. Try re-exporting it as a high-resolution PNG or JPG.');
+      addToast?.({ type: 'error', title: 'Decode Error', message: 'Could not decode this drawing. Try re-exporting it as a high-resolution PNG or JPG.', duration: 6000 });
     };
     img.src = src;
   };
@@ -535,7 +538,7 @@ export const BlueprintCanvasOverlay: React.FC<BlueprintCanvasOverlayProps> = ({
             await renderPdfPage(doc, 1);
           } catch (err) {
             console.error('Failed to parse PDF:', err);
-            alert('Could not render PDF. Please upload a high-resolution PNG or JPG export of the blueprint.');
+            addToast?.({ type: 'error', title: 'PDF Render Error', message: 'Could not render PDF. Please upload a high-resolution PNG or JPG export of the blueprint.', duration: 6000 });
           } finally {
             setIsPdfLoading(false);
           }
@@ -563,15 +566,15 @@ export const BlueprintCanvasOverlay: React.FC<BlueprintCanvasOverlayProps> = ({
           loadImageFromSrc(injectSvgDimensions(svgText), 32);
         } catch (err) {
           console.error('Failed to load SVG:', err);
-          alert('Could not load this SVG. Try exporting your drawing as a high-resolution PNG or JPG.');
+          addToast?.({ type: 'error', title: 'SVG Load Error', message: 'Could not load this SVG. Try exporting your drawing as a high-resolution PNG or JPG.', duration: 6000 });
         }
       };
       reader.onerror = () => {
-        alert('Could not read this SVG file. Try exporting your drawing as a PNG or JPG.');
+        addToast?.({ type: 'error', title: 'SVG Read Error', message: 'Could not read this SVG file. Try exporting your drawing as a PNG or JPG.', duration: 6000 });
       };
       reader.readAsText(file);
     } else {
-      alert('Unsupported file type. Please upload a PDF, SVG, PNG, JPG, or WEBP blueprint.');
+      addToast?.({ type: 'error', title: 'Unsupported File', message: 'Please upload a PDF, SVG, PNG, JPG, or WEBP blueprint.', duration: 6000 });
     }
   };
 
@@ -1371,7 +1374,7 @@ export const BlueprintCanvasOverlay: React.FC<BlueprintCanvasOverlayProps> = ({
         ? attachTargetItemId
         : currentProject.items[0]?.id;
       if (!targetId) {
-        alert('No BOQ items available to attach to. Add a BOQ item first, or switch to "New BOQ Item" mode.');
+        addToast?.({ type: 'info', title: 'No BOQ Items', message: 'Add a BOQ item first, or switch to "New BOQ Item" mode.', duration: 5000 });
         return;
       }
       onSaveSubdivisionToBOQ?.(targetId, [buildSubLineFromMeasurement(meas)]);
@@ -1430,7 +1433,7 @@ export const BlueprintCanvasOverlay: React.FC<BlueprintCanvasOverlayProps> = ({
   const handleBatchSaveAllToBOQ = () => {
     const unsaved = measurements.filter(m => !m.isSavedToBOQ);
     if (unsaved.length === 0) {
-      alert('All measurements have already been saved to the BOQ sheet.');
+      addToast?.({ type: 'info', title: 'Already Saved', message: 'All measurements have already been saved to the BOQ sheet.', duration: 5000 });
       return;
     }
 
@@ -1456,7 +1459,7 @@ export const BlueprintCanvasOverlay: React.FC<BlueprintCanvasOverlayProps> = ({
         ? attachTargetItemId
         : currentProject.items[0]?.id;
       if (!targetId) {
-        alert('No BOQ items available to attach to. Add a BOQ item first, or switch to "New BOQ Item" mode.');
+        addToast?.({ type: 'info', title: 'No BOQ Items', message: 'Add a BOQ item first, or switch to "New BOQ Item" mode.', duration: 5000 });
         return;
       }
       const lines = unsaved.map(buildSubLineFromMeasurement);

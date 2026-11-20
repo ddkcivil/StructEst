@@ -19,11 +19,13 @@ import {
   Square
 } from 'lucide-react';
 import { MaterialRate } from '../App';
+import { type Toast as ToastType } from './Toast';
 
 export interface MaterialsLibraryProps {
   materials: MaterialRate[];
   setMaterials: React.Dispatch<React.SetStateAction<MaterialRate[]>>;
   currency?: string;
+  addToast?: (toast: Omit<ToastType, 'id'>) => void;
 }
 
 const MATERIAL_CATEGORIES = [
@@ -117,7 +119,8 @@ interface ParsedCandidateItem {
 export const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({
   materials,
   setMaterials,
-  currency = 'NPR'
+  currency = 'NPR',
+  addToast
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -166,7 +169,7 @@ export const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({
   // Export current active materials library to CSV
   const handleExportCurrentLibrary = () => {
     if (materials.length === 0) {
-      alert('The material library is currently empty.');
+      addToast?.({ type: 'info', title: 'Empty Library', message: 'The material library is currently empty.', duration: 4000 });
       return;
     }
 
@@ -301,7 +304,7 @@ export const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({
   const handleCommitBulkImport = () => {
     const selectedItems = parsedCandidates.filter(c => c.selected);
     if (selectedItems.length === 0) {
-      alert('Please select at least one material rate to import.');
+      addToast?.({ type: 'info', title: 'No Items Selected', message: 'Please select at least one material rate to import.', duration: 4000 });
       return;
     }
 
@@ -416,7 +419,7 @@ export const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({
   const handleSaveSingleItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim()) {
-      alert('Material name is required.');
+      addToast?.({ type: 'error', title: 'Name Required', message: 'Material name is required.', duration: 4000 });
       return;
     }
 

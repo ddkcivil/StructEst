@@ -1,5 +1,6 @@
 import React from 'react';
 import { Project } from '../App';
+import { type Toast as ToastType } from './Toast';
 
 interface ProjectParametersProps {
   currentProject: Project;
@@ -7,9 +8,10 @@ interface ProjectParametersProps {
   projects: Project[];
   templates: any[];
   setTemplates: (templates: any) => void;
+  addToast?: (toast: Omit<ToastType, 'id'>) => void;
 }
 
-export const ProjectParameters: React.FC<ProjectParametersProps> = ({ currentProject, setProjects, projects, templates, setTemplates }) => {
+export const ProjectParameters: React.FC<ProjectParametersProps> = ({ currentProject, setProjects, projects, templates, setTemplates, addToast }) => {
   const updateProject = (updates: Partial<Project>) => {
     setProjects(projects.map(p => p.id === currentProject.id ? { ...p, ...updates } : p));
   };
@@ -30,7 +32,7 @@ export const ProjectParameters: React.FC<ProjectParametersProps> = ({ currentPro
         contingencyPercent: currentProject.contingencyPercent
     };
     setTemplates([...templates, newTmpl]);
-    alert('Template saved successfully!');
+    addToast?.({ type: 'success', title: 'Template Saved', message: 'Project template saved successfully.', duration: 5000 });
   };
 
   return (

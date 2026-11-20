@@ -4709,53 +4709,7 @@ EOF`;
                   <div className="relative z-10 max-w-full max-h-[320px] overflow-hidden rounded-xl border border-slate-700">
                     <img src={importedFilePreview} alt="Uploaded blueprint" className="object-contain max-h-[300px]" />
                   </div>
-                ) : (
-                  <div className="relative z-10 w-full max-w-2xl h-64 border-2 border-amber-500/60 rounded-xl bg-slate-950/80 p-6 flex flex-col justify-between shadow-2xl">
-                    <div className="flex justify-between text-xs font-mono text-amber-400">
-                      <span>FORMATS SUPPORTED: .DXF, .DWG, .PDF, .PNG, .JPG</span>
-                      <span>SCALE: 1:100</span>
-                    </div>
-                    <div className="flex items-center justify-center space-x-6 my-auto">
-                      <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl text-center">
-                        <p className="text-xs text-slate-400">Sample Wall Length</p>
-                        <p className="text-2xl font-black text-amber-400 font-mono mt-1">38.40 m</p>
-                      </div>
-                      <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl text-center">
-                        <p className="text-xs text-slate-400">Standard Height</p>
-                        <p className="text-2xl font-black text-slate-200 font-mono mt-1">{currentProject.standardWallHeight} m</p>
-                      </div>
-                      <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl text-center">
-                        <p className="text-xs text-slate-400">Calculated Area</p>
-                        <p className="text-2xl font-black text-emerald-400 font-mono mt-1">{(38.4 * currentProject.standardWallHeight).toFixed(1)} m²</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center pt-2 border-t border-slate-800 text-xs text-slate-400">
-                      <span>Default Demo Drawing Active</span>
-                      <button
-                        onClick={() => {
-                          const newItem: MeasurementItem = {
-                            id: 'item-' + Date.now(),
-                            category: 'Superstructure',
-                            description: `Brickwork in Superstructure (${importedFileName || 'Default Plan'})`,
-                            unit: 'm³',
-                            length: 38.4,
-                            width: 0.23,
-                            height: currentProject.standardWallHeight,
-                            qty: 1,
-                            wastagePercent: currentProject.wastageDefault,
-                            unitRate: 18500
-                          };
-                          const updatedProjects = projects.map(p => p.id === currentProject.id ? { ...p, items: [...p.items, newItem] } : p);
-                          setProjects(updatedProjects);
-                          alert('Successfully pushed measured item to BOQ sheet!');
-                        }}
-                        className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg font-bold transition shadow"
-                      >
-                        + Push to BOQ
-                      </button>
-                    </div>
-                  </div>
-                )}
+                ) : null}
               </div>
 
               {/* Format Guide */}

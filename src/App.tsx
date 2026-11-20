@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import DxfParser from 'dxf-parser';
 declare module 'dxf-parser';
 import {
@@ -121,6 +121,7 @@ export {
 
 import { DEFAULT_MATERIALS, BLANK_PROJECT, INITIAL_PROJECTS } from './constants';
 import { ensureItemCategories } from './utils';
+import { Toast, ToastContainer, showToast, type Toast as ToastType } from './components/Toast';
 
 
 
@@ -178,6 +179,17 @@ export default function App() {
     const saved = localStorage.getItem('structest_theme');
     return saved ? saved === 'dark' : false;
   });
+  const [toasts, setToasts] = useState<ToastType[]>([]);
+
+  const addToast = useCallback((toast: Omit<ToastType, 'id'>) => {
+    const id = 'toast-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+    setToasts((prev) => [...prev, { ...toast, id }]);
+  }, []);
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   const [nbcSubTab, setNbcSubTab] = useState<'audit' | 'municipal'>('municipal');
   const [cadScalePreset, setCadScalePreset] = useState<string>('1:100');
   const [cadScaleFactor, setCadScaleFactor] = useState<number>(1.0);
@@ -265,10 +277,10 @@ export default function App() {
 
     if (generatedItems.length > 0) {
       handleBatchSaveTakeoffItemsToBOQ(generatedItems);
-      alert(`Successfully generated ${newItemsCount} BOQ items using Layer Mapping AI Take-Off rules! Check the BOQ Summary tab.`);
+      addToast({ type: 'success', title: 'AI Take-Off Complete', message: `Generated ${newItemsCount} BOQ items using Layer Mapping rules. Check the BOQ Summary tab.`, duration: 5000 });
       logActivity('AI Layer Mapping Take-Off', `Generated ${newItemsCount} items from mapped CAD layers.`);
     } else {
-      alert('No layers available for mapping take-off.');
+      addToast({ type: 'error', title: 'No Layers Available', message: 'Cannot perform mapping take-off without CAD layers.', duration: 4000 });
     }
   };
 
@@ -419,7 +431,21 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('structest_theme', isDarkMode ? 'dark' : 'light');
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [isDarkMode]);
+
+  // Apply saved theme on mount
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   const logActivity = (action: string, details: string) => {
     const entry: AuditLogEntry = {
@@ -965,7 +991,7 @@ EOF`;
       const parser = new DxfParser();
       const dxf = parser.parseSync(fileContent);
       if (!dxf || !dxf.entities) {
-        alert('Could not parse valid entities from DXF file.');
+        addToast({ type: 'error', title: 'DXF Parse Error', message: 'Could not parse valid entities from DXF file.', duration: 5000 });
         return;
       }
 
@@ -988,7 +1014,7 @@ EOF`;
       setCadTakeoffSuccessMessage(null);
       setCadWallHeight(currentProject.standardWallHeight || 3.0);
     } catch (err: any) {
-      alert('Error parsing DXF file: ' + err.message);
+      addToast({ type: 'error', title: 'DXF Error', message: 'Error parsing DXF file: ' + err.message, duration: 6000 });
     }
   };
 
@@ -1021,11 +1047,11 @@ EOF`;
           setCadTakeoffError(null);
           setParsedDxf(null);
         } else {
-          alert('Could not extract usable geometry from PDF file.');
+          addToast({ type: 'error', title: 'PDF Parse Error', message: 'Could not extract usable geometry from PDF file.', duration: 5000 });
         }
       }
     } catch (err: any) {
-      alert('Error parsing PDF file: ' + err.message);
+      addToast({ type: 'error', title: 'PDF Error', message: 'Error parsing PDF file: ' + err.message, duration: 6000 });
     }
   };
 
@@ -1126,7 +1152,7 @@ EOF`;
 
   const handleRunAiCadTakeoff = async () => {
     if (!parsedDxf) {
-      alert('Please upload or load a CAD DXF file first.');
+      addToast({ type: 'info', title: 'CAD File Required', message: 'Please upload or load a CAD DXF file first.', duration: 4000 });
       return;
     }
 
@@ -1198,7 +1224,7 @@ EOF`;
   // AI Image Take-Off handler
   const handleRunAiImageTakeoff = async () => {
     if (!importedFilePreview) {
-      alert('Please upload an image first.');
+      addToast({ type: 'info', title: 'Image Required', message: 'Please upload an image first.', duration: 4000 });
       return;
     }
     setAiImageTakeoffLoading(true);
@@ -1292,7 +1318,7 @@ EOF`;
   const handleCommitStagedTakeoffItems = () => {
     const selectedItems = stagedCadItems.filter(i => i.selected);
     if (selectedItems.length === 0) {
-      alert('Please select at least one item to commit to the measurement sheet.');
+      addToast({ type: 'info', title: 'No Items Selected', message: 'Please select at least one item to commit to the measurement sheet.', duration: 4000 });
       return;
     }
 
@@ -1933,6 +1959,8 @@ EOF`;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans selection:bg-amber-500 selection:text-slate-950">
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       {/* Collapsible Sidebar */}
       <aside className={`print:hidden bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/70 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col`}>
         {/* Brand area */}
@@ -1976,7 +2004,7 @@ EOF`;
                 key={tab.id}
                 onClick={() => {
                   if (tab.restricted) {
-                    alert('You do not have permission to access this tab.');
+                    addToast({ type: 'error', title: 'Permission Denied', message: 'You do not have permission to access this tab.', duration: 4000 });
                     return;
                   }
                   setActiveTab(tab.id as any);
@@ -4187,7 +4215,7 @@ EOF`;
                             };
                             const updatedProjects = projects.map(p => p.id === currentProject.id ? { ...p, items: [...p.items, newItem] } : p);
                             setProjects(updatedProjects);
-                            alert(`Successfully pushed layer [${selectedDxfLayer}] (${calculatedDxfLength}m) to BOQ!`);
+                            addToast({ type: 'success', title: 'Pushed to BOQ', message: `Layer [${selectedDxfLayer}] (${calculatedDxfLength}m) added to BOQ!`, duration: 5000 });
                           }}
                           className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2.5 rounded-xl font-bold text-xs transition shadow"
                         >
@@ -4953,7 +4981,7 @@ EOF`;
                                   contingencyPercent: t.contingencyPercent
                               } : p);
                               setProjects(updated);
-                              alert(`Applied template "${t.name}" to project "${currentProject.name}"`);
+                              addToast({ type: 'success', title: 'Template Applied', message: `Applied template "${t.name}" to project "${currentProject.name}".`, duration: 5000 });
                           }} className="text-amber-400 text-xs hover:underline font-bold">Apply</button>
                           <button onClick={() => setTemplates(templates.filter(x => x.id !== t.id))} className="text-rose-400 text-xs hover:underline">Delete</button>
                       </div>
@@ -5030,7 +5058,7 @@ EOF`;
                 <button
                   onClick={() => {
                     if (projects.filter(p => !p.isArchived).length <= 1) {
-                      alert('Cannot archive the last active project.');
+                      addToast({ type: 'error', title: 'Cannot Archive', message: 'Cannot archive the last active project.', duration: 4000 });
                       return;
                     }
                     if (confirm(`Are you sure you want to archive "${currentProject.name}"? It will be moved to the archived storage vault.`)) {

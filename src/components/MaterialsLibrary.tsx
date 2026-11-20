@@ -40,7 +40,7 @@ const MATERIAL_CATEGORIES = [
 ];
 
 // Sample CSV template content with standard construction items
-const SAMPLE_CSV_CONTENT = `Name,Category,Unit,Rate,Supplier,Specification
+const SAMPLE_CSV = `
 "OPC 53 Grade Cement (50kg bag)","Cement & Concrete","bags",850,"Shivam / UltraTech Cement","IS 12269 certified, 53 grade high early strength"
 "PPC Cement (50kg bag)","Cement & Concrete","bags",750,"Jagdamba / Agni Cement","Flyash based Portland Pozzolana Cement"
 "TMT Fe 500D Rebar (12mm/16mm)","Steel & Rebar","kg",108,"Tata Tiscon / Jagdamba","High ductile earthquake resistant grade"
@@ -160,22 +160,8 @@ export const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({
   }, [materials]);
 
   // Trigger Sample CSV Download
-  const handleDownloadSampleCsv = () => {
-    const blob = new Blob([SAMPLE_CSV_CONTENT], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'structest_material_rates_template.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    setNotification({
-      type: 'success',
-      message: 'Sample CSV template downloaded! You can fill in your custom rates and re-upload.'
-    });
-  };
+  //
+    //
 
   // Export current active materials library to CSV
   const handleExportCurrentLibrary = () => {
@@ -527,12 +513,12 @@ export const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Generate & Download Sample CSV Template */}
             <button
-              onClick={handleDownloadSampleCsv}
-              className="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 hover:border-amber-500/50 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow"
+              //
+              //
               title="Download pre-formatted CSV template with standard civil, structural, and finishing items"
             >
               <Download className="w-4 h-4" />
-              <span>Sample CSV Template</span>
+              //
             </button>
 
             {/* Bulk Import CSV File */}
@@ -748,10 +734,10 @@ export const MaterialsLibrary: React.FC<MaterialsLibraryProps> = ({
                       Paste CSV Content (Comma or Tab Separated):
                     </label>
                     <button
-                      onClick={() => setPastedCsvText(SAMPLE_CSV_CONTENT)}
+                      //
                       className="text-amber-400 hover:underline text-[11px] font-medium"
                     >
-                      Paste Sample Construction Rates
+                      //
                     </button>
                   </div>
                   <textarea

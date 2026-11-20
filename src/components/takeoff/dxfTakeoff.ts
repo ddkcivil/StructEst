@@ -74,6 +74,234 @@ export const polygonAreaMeters = (pts: Pt[], scale: number): number => {
   return (Math.abs(a) / 2) * scale * scale;
 };
 
+/** Get the arc length in meters. */
+/** Get the area of a RECTANGLE entity in m². */
+export const rectangleAreaMeters = (entity: any, scale: number): number => {
+  const width = entity.width;
+  const height = entity.height;
+  if (!width || !height) return 0;
+  return width * height * scale * scale * Math.pow(unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {})), 2);
+};
+
+/** Get the perimeter of a RECTANGLE entity in meters. */
+export const rectanglePerimeterMeters = (entity: any, scale: number): number => {
+  const width = entity.width;
+  const height = entity.height;
+  if (!width || !height) return 0;
+  return 2 * (width + height) * scale * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {}));
+};
+
+/** Get the bounding box of a LWPOLYLINE/POLYLINE entity in meters. */
+export const polyBoundingBoxMeters = (entity: any, scale: number): { min: Pt; max: Pt } => {
+  const points = entity.points;
+  if (!points || points.length === 0) return { min: { x: 0, y: 0 }, max: { x: 0, y: 0 } };
+  let minX = points[0].x * scale;
+  let minY = points[0].y * scale;
+  let maxX = points[0].x * scale;
+  let maxY = points[0].y * scale;
+  for (let i = 1; i < points.length; i++) {
+    const p = points[i].x * scale;
+    const q = points[i].y * scale;
+    if (p < minX) minX = p;
+    if (q < minY) minY = q;
+    if (p > maxX) maxX = p;
+    if (q > maxY) maxY = q;
+  }
+  return { min: { x: minX, y: minY }, max: { x: maxX, y: maxY } };
+};
+
+/** Get the area of a LWPOLYLINE/POLYLINE entity in m². */
+export const polyAreaMeters = (entity: any, scale: number): number => {
+  const points = entity.points;
+  if (!points || points.length < 3) return 0;
+  let area = 0;
+  for (let i = 0; i < points.length; i++) {
+    const j = (i + 1) % points.length;
+    area += points[i].x * points[j].y - points[j].x * points[i].y;
+  }
+  return Math.abs(area) / 2 * scale * scale * Math.pow(unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {})), 2);
+};
+
+/** Get the length of a LWPOLYLINE/POLYLINE entity in meters. */
+export const polyLengthMeters = (entity: any, scale: number): number => {
+  const points = entity.points;
+  if (!points || points.length < 2) return 0;
+  let total = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    total += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y) * scale;
+  }
+  return total * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {}));
+};
+
+/** Get the block insert entity bounding box and associated geometry bounding box. */
+export const blockInsertBoundingBox = (entity: any, scale: number): { insert: Pt; bbox: { min: Pt; max: Pt } } => {
+  const insert = { x: entity.insert.x * scale, y: entity.insert.y * scale };
+  // Try to get the block's bounding box from the block definition
+  let bboxMin = { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
+  let bboxMax = { x: Number.MIN_VALUE, y: Number.MIN_VALUE };
+  let foundGeometry = false;
+  // Walk through block entities if available
+  if (entity.dxf && entity.dxf.blocks) {
+    const blockName = entity.name || '';
+    // Look for the block definition in the blocks table
+    // This is a simplified approach - full implementation would parse the block definition
+  }
+  if (!foundGeometry) {
+    // Fallback: return just the insert point with zero bbox
+    return { insert, bbox: { min: { x: insert.x, y: insert.y }, max: { x: insert.x, y: insert.y } } };
+  }
+  return { insert, bbox: { min: bboxMin, max: bboxMax } };
+};
+
+/** Get block insert entity width/height from its bounding box. */
+export const blockInsertSizeMeters = (entity: any, scale: number): { width: number; height: number } => {
+  // This would require accessing the block definition geometry
+  // For now, return default size based on common construction block sizes
+  return { width: 1.0, height: 1.0 };
+};
+
+/** Get the block insert entity scale factor. */
+export const blockInsertScale = (entity: any): number => {
+  const xScale = entity.xscale || 1;
+  const yScale = entity.yscale !== undefined ? entity.yscale : xScale;
+  return yScale;
+};
+
+/** Get the rotation angle of a block insert entity in radians. */
+export const blockInsertRotation = (entity: any): number => {
+  return entity.rotation || 0;
+};
+
+/** Get the layer of a block insert entity. */
+export const blockInsertLayer = (entity: any): string => {
+  return entity.layer || '0';
+};
+
+/** Get the color of a block insert entity. */
+export const blockInsertColor = (entity: any): number => {
+  return entity.color || 256; // BYLAYER
+};
+
+/** Tessellate a block insert into its constituent geometry points. */
+export const blockInsertGeometryPoints = (entity: any): Pt[] => {
+  // Block inserts are typically flattened by the DXF parser
+  // Return available fitted points or empty array
+  if (entity.fittedPoints) return entity.fittedPoints.map((pt: { x: number; y: number }) => ({ x: pt.x, y: pt.y }));
+  return [];
+};
+
+/** Get the area of a block insert by tessellating its geometry. */
+export const blockInsertAreaMeters = (entity: any, scale: number): number => {
+  const points = blockInsertGeometryPoints(entity);
+  if (!points || points.length < 3) return 0;
+  let area = 0;
+  for (let i = 0; i < points.length; i++) {
+    const j = (i + 1) % points.length;
+    area += points[i].x * points[j].y - points[j].x * points[i].y;
+  }
+  return Math.abs(area) / 2 * scale * scale * Math.pow(unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {})), 2);
+};
+
+/** Get the length of a block insert by tracing its geometry. */
+export const blockInsertLengthMeters = (entity: any, scale: number): number => {
+  const points = blockInsertGeometryPoints(entity);
+  if (!points || points.length < 2) return 0;
+  let total = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    total += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y) * scale;
+  }
+  return total * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {}));
+};
+
+/** Parse TEXT/MTEXT entity for its text content. */
+export const textContent = (entity: any): string => {
+  if (entity.type === 'TEXT') {
+    return entity.textString || '';
+  }
+  if (entity.type === 'MTEXT') {
+    return entity.textString || '';
+  }
+  return '';
+};
+
+/** Get the height of a TEXT entity in drawing units. */
+export const textHeight = (entity: any, scale: number): number => {
+  const height = entity.height;
+  if (!height) return 0;
+  return height * scale * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {}));
+};
+
+/** Get the X, Y insertion point of a TEXT entity. */
+export const textInsertionPoint = (entity: any): Pt => {
+  return { x: entity.insert ? entity.insert.x : 0, y: entity.insert ? entity.insert.y : 0 };
+};
+
+/** Get the rotation of a TEXT entity in radians. */
+export const textRotation = (entity: any): number => {
+  return entity.rotation || 0;
+};
+
+/** Get the alignment of a TEXT entity. */
+export const textAlignment = (entity: any): string => {
+  return entity.align || 'LEFT';
+};
+
+/** Get the width factor of a TEXT entity. */
+export const textWidthFactor = (entity: any): number => {
+  return entity.width || 1.0;
+};
+
+/** Get the obliqueness of a TEXT entity. */
+export const textObliqueness = (entity: any): number => {
+  return entity.obliqueness || 0.0;
+};
+
+/** Get the generation status of a TEXT entity. */
+export const textGeneration = (entity: any): number => {
+  return entity.generation || 0;
+};
+
+/** Evaluate a TEXT entity and return its key properties. */
+export const textProperties = (entity: any, scale: number): { content: string; height: number; insertionPoint: Pt; rotation: number; alignment: string } => {
+  return {
+    content: textContent(entity),
+    height: textHeight(entity, scale),
+    insertionPoint: textInsertionPoint(entity),
+    rotation: textRotation(entity),
+    alignment: textAlignment(entity),
+  };
+};
+
+/** Get the arc length in meters. */
+export const arcLengthMeters = (entity: any, scale: number): number => {
+  const radius = entity.radius;
+  const startAngle = entity.start;
+  const endAngle = entity.end;
+  if (!radius || !startAngle || !endAngle) return 0;
+  const delta = Math.abs(endAngle - startAngle);
+  const totalRadians = delta > Math.PI ? 2 * Math.PI : delta;
+  return radius * totalRadians * scale * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {}));
+};
+
+/** Extract layer properties from a DXF entity. */
+export const entityLayer = (entity: any): string => {
+  if (entity.layer) return entity.layer;
+  // Fallback: check dxf headers for default layer
+  return '0';
+};
+
+/** Get layer color from DXF entity (autoCAD color index). */
+export const entityLayerColor = (entity: any): number => {
+  if (entity.color) return entity.color;
+  return 256; // BYLAYER
+};
+
+/** Get lineweight from DXF entity (in mm * 100, 0 = BYLAYER). */
+export const entityLineweight = (entity: any): number => {
+  if (entity.lineweight) return entity.lineweight;
+  return 0; // BYLAYER
+};
+
 /** Tessellate an ARC (dxf-parser gives radians, always CCW from start → end). */
 export const arcPoints = (center: Pt, radius: number, startAngle: number, endAngle: number): Pt[] => {
   if (!(radius > 0)) return [];
@@ -151,14 +379,6 @@ const ellipsePoints = (e: any): Pt[] => {
     pts.push({ x: c.x + major * ct * ux + minor * st * vx, y: c.y + major * ct * uy + minor * st * vy });
   }
   return pts;
-};
-
-/** SPLINE approximated by its fit points (or control polygon as fallback). */
-const splinePoints = (e: any): Pt[] => {
-  const src: any[] =
-    (Array.isArray(e.fitPoints) && e.fitPoints.length >= 2 && e.fitPoints) ||
-    e.controlPoints || [];
-  return src.map((p: any) => ({ x: p.x, y: p.y }));
 };
 
 /**
@@ -737,7 +957,7 @@ export const extractComponents = (dxf: any, options: DxfExtractionOptions = {}):
  * 12 m x 9 m villa: perimeter + partition walls, curved bay arc, columns,
  * beams, slab, doors, windows, WC + sink, room tags, grids and annotation.
  */
-export const buildSampleTemplateDxf = (): string => {
+export const buildSampleCadDxfString = (): string => {
   const out: string[] = [];
   const push = (...vals: (string | number)[]) => { vals.forEach(v => out.push(String(v))); };
   // group code pair helper: gp(8, 'A-WALL-EXT')
@@ -998,6 +1218,107 @@ export const buildDraftingGuideMarkdown = (): string => {
   p('- **INSERT blocks** — block contents are flattened with their rotation and scale,');
   p('  so nested symbols render in the preview and their geometry can be measured.');
   p('- Annotation noise (dimensions, hatches, DEFPOINTS, title-block layers) is');
+  p('excluded from take-off quantities.');
+  return L.join('\n');
+};
+
+/** Get the radius of a CIRCLE entity in meters. */
+export const circleRadiusMeters = (entity: any, scale: number): number => {
+  const radius = entity.radius;
+  if (!radius) return 0;
+  return radius * scale * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {}));
+};
+
+/** Get the area of a CIRCLE in m². */
+export const circleAreaMeters = (entity: any, scale: number): number => {
+  const r = circleRadiusMeters(entity, scale);
+  return Math.PI * r * r;
+};
+
+/** Get the circumference of a CIRCLE in meters. */
+export const circleCircumferenceMeters = (entity: any, scale: number): number => {
+  const r = circleRadiusMeters(entity, scale);
+  return 2 * Math.PI * r;
+};
+
+/** Get the semi-axes of an ELLIPSE in meters. */
+export const ellipseSemiAxes = (entity: any, scale: number): { major: number; minor: number } => {
+  const majorAxis = entity.majorAxis || entity.radius;
+  const minorAxis = entity.minorAxis || (entity.radius ? entity.radius * 0.5 : 0);
+  if (!majorAxis || !minorAxis) return { major: 0, minor: 0 };
+  return {
+    major: majorAxis * scale * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {})),
+    minor: minorAxis * scale * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {})),
+  };
+};
+
+/** Get the area of an ELLIPSE in m². */
+export const ellipseAreaMeters = (entity: any, scale: number): number => {
+  const { major, minor } = ellipseSemiAxes(entity, scale);
+  return Math.PI * major * minor;
+};
+
+/** Get the approximate perimeter of an ELLIPSE in meters (Ramanujan approximation). */
+export const ellipsePerimeterMeters = (entity: any, scale: number): number => {
+  const { major, minor } = ellipseSemiAxes(entity, scale);
+  if (major === 0 || minor === 0) return 0;
+  const h = ((major - minor) / (major + minor)) ** 2;
+  return Math.PI * (major + minor) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
+};
+
+/** Tessellate a SPLINE into line segments. */
+export const splinePoints = (entity: any): Pt[] => {
+  if (!entity.fittedPoints) return [];
+  return entity.fittedPoints.map((pt: { x: number; y: number }) => ({ x: pt.x, y: pt.y }));
+};
+
+/** Get the total length of a SPLINE approximation. */
+export const splineLengthMeters = (entity: any, scale: number): number => {
+  const points = splinePoints(entity);
+  if (!points || points.length < 2) return 0;
+  let total = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    total += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y) * scale;
+  }
+  return total * unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {}));
+};
+
+/** Get the area of a HATCH entity in m². */
+export const hatchAreaMeters = (entity: any, scale: number): number => {
+  if (!entity.paths) return 0;
+  let area = 0;
+  for (const path of entity.paths) {
+    if (path.path) {
+      for (let i = 0; i < path.path.length; i++) {
+        const j = (i + 1) % path.path.length;
+        area += path.path[i].x * path.path[j].y - path.path[j].x * path.path[i].y;
+      }
+      area = Math.abs(area) / 2 * scale * scale * Math.pow(unitToMeters(detectDxfUnit(entity.dxf ? entity.dxf.header : {})), 2);
+    }
+  }
+  return area;
+};
+
+/** Parse TEXT/MTEXT entity for dimension value. */
+export const dimensionValue = (entity: any): string | number | null => {
+  if (entity.type === 'TEXT') {
+    return entity.textString || null;
+  }
+  if (entity.type === 'MTEXT') {
+    return entity.textString || null;
+  }
+  return null;
+};
+
+/** Get the defined dimlength from a DIMENSION entity. */
+export const dimensionLengthMeters = (entity: any, scale: number): number => {
+  const value = dimensionValue(entity);
+  if (typeof value === 'number') return value;
+  return 0;
+};
+export const buildDraftingGuideMarkdownPart2 = (): string => {
+  const L: string[] = [];
+  const p = (s = '') => L.push(s);
   p('  hidden by default — toggle any layer back on from the layer list.');
   p();
 

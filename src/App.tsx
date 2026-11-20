@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import DxfParser from 'dxf-parser';
 declare module 'dxf-parser';
 import {
@@ -62,15 +62,14 @@ import {
 } from 'lucide-react';
 import { BlueprintCanvasOverlay } from './components/BlueprintCanvasOverlay';
 import { ProjectParameters } from './components/ProjectParameters';
-import { MaterialsLibrary } from './components/MaterialsLibrary';
 import { DxfLayerDistributionChart } from './components/DxfLayerDistributionChart';
 import { NbcMunicipalCompliance } from './components/NbcMunicipalCompliance';
 import { DEFAULT_BOQ_TERMS } from './components/takeoff/terms';
 import { AuthPage } from './components/AuthPage';
 import { CadImporter } from './components/App/CadImporter';
 import { ProjectList } from './components/App/ProjectList';
-import { AuditLog } from './components/App/AuditLog';
 import { CadLineweightLegend } from './components/CadLineweightLegend';
+import { MaterialsLibrary } from './components/MaterialsLibrary';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -895,7 +894,7 @@ ANNOTATIONS
   40
 0.3
   1
-D1: Main Entrance Door 1.0m x 2.1m
+D1: Main Entrance Door 1.0 m x 2.1 m
   0
 TEXT
   8
@@ -907,7 +906,7 @@ ANNOTATIONS
   40
 0.3
   1
-W1: Window 1.5m x 1.4m
+W1: Window 1.5 m x 1.4 m
   0
 TEXT
   8
@@ -919,7 +918,7 @@ ANNOTATIONS
   40
 0.3
   1
-W2: Window 1.5m x 1.4m
+W2: Window 1.5 m x 1.4 m
   0
 TEXT
   8
@@ -931,7 +930,7 @@ ANNOTATIONS
   40
 0.3
   1
-W3: Window 1.5m x 1.4m
+W3: Window 1.5 m x 1.4 m
   0
 TEXT
   8
@@ -943,7 +942,7 @@ ANNOTATIONS
   40
 0.4
   1
-Master Bed (6.0m x 9.5m)
+Master Bed (6.0 m x 9.5 m)
   0
 TEXT
   8
@@ -955,7 +954,7 @@ ANNOTATIONS
   40
 0.4
   1
-Living & Dining (8.0m x 5.0m)
+Living & Dining (8.0 m x 5.0 m)
   0
 ENDSEC
   0
@@ -2244,7 +2243,7 @@ EOF`;
                   <p className="text-xl font-black text-indigo-400 font-mono mt-1">
                     {(currentProject.items.filter(i => i.unit === 'm³' && (i.description.includes('CONCRETE') || i.description.includes('R.C.C') || i.description.includes('P.C.C'))).reduce((sum, i) => sum + calculateItemQuantity(i), 0) * 7.5).toFixed(0)} bags
                   </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">OPC 53 / PPC Grade (50kg)</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">OPC 53 / PPC Grade (50 kg)</p>
                 </div>
 
                 <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
@@ -2268,7 +2267,7 @@ EOF`;
                   <p className="text-xl font-black text-orange-400 font-mono mt-1">
                     {(currentProject.items.find(i => i.id === 'item-8')?.qty || 252.04).toFixed(2)} m²
                   </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">12/19mm waterproof ply</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">12/19 mm waterproof ply</p>
                 </div>
               </div>
 
@@ -2329,8 +2328,8 @@ EOF`;
 
                       <tr className="hover:bg-slate-950/50">
                         <td className="py-3 px-4 font-bold">4. Column Reinforcement</td>
-                        <td className="py-3 px-4 text-slate-400">Min 8-16φ or 4-16φ+4-12φ as per zone</td>
-                        <td className="py-3 px-4 font-mono text-amber-400">4-16φ + 4-12φ (8 bars total)</td>
+                        <td className="py-3 px-4 text-slate-400">Min 8-16 φ or 4-16 φ+4-12 φ as per zone</td>
+                        <td className="py-3 px-4 font-mono text-amber-400">4-16 φ + 4-12 φ (8 bars total)</td>
                         <td className="py-3 px-4 text-center">
                           <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded text-[10px] font-bold">
                             COMPLIANT
@@ -2341,14 +2340,14 @@ EOF`;
 
                       <tr className="hover:bg-slate-950/50">
                         <td className="py-3 px-4 font-bold">5. Column Transverse Stirrups</td>
-                        <td className="py-3 px-4 text-slate-400">8mm @ 75mm c/c in confinement zone, 125mm rest</td>
-                        <td className="py-3 px-4 font-mono text-amber-400">8φ @ 75 / 125 mm c/c</td>
+                        <td className="py-3 px-4 text-slate-400">8 mm @ 75 mm c/c in confinement zone, 125 mm rest</td>
+                        <td className="py-3 px-4 font-mono text-amber-400">8 φ @ 75 / 125 mm c/c</td>
                         <td className="py-3 px-4 text-center">
                           <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded text-[10px] font-bold">
                             COMPLIANT
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-slate-400">Table 9-9: Closed ties with 135° hooks (≥65mm length).</td>
+                        <td className="py-3 px-4 text-slate-400">Table 9-9: Closed ties with 135 °° hooks (≥65 mm length).</td>
                       </tr>
 
                       <tr className="hover:bg-slate-950/50">
@@ -2372,13 +2371,13 @@ EOF`;
                             COMPLIANT
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-slate-400">Section 10.1: 8φ @ 150mm c/c mesh reinforcement.</td>
+                        <td className="py-3 px-4 text-slate-400">Section 10.1: 8 φ @ 150 mm c/c mesh reinforcement.</td>
                       </tr>
 
                       <tr className="hover:bg-slate-950/50">
                         <td className="py-3 px-4 font-bold">8. Lapping & Development Length</td>
-                        <td className="py-3 px-4 text-slate-400">Minimum 57φ (e.g. 690mm for 12φ, 920mm for 16φ)</td>
-                        <td className="py-3 px-4 font-mono text-amber-400">≥ 57φ provided</td>
+                        <td className="py-3 px-4 text-slate-400">Minimum 57 φ (e.g. 690 mm for 12 φ, 920 mm for 16 φ)</td>
+                        <td className="py-3 px-4 font-mono text-amber-400">≥ 57 φ provided</td>
                         <td className="py-3 px-4 text-center">
                           <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded text-[10px] font-bold">
                             COMPLIANT
@@ -2389,7 +2388,7 @@ EOF`;
 
                       <tr className="hover:bg-slate-950/50">
                         <td className="py-3 px-4 font-bold">9. Non-Loadbearing Wall Bands</td>
-                        <td className="py-3 px-4 text-slate-400">Horizontal RC bands at 1/3 and 2/3 height (2-10φ bars)</td>
+                        <td className="py-3 px-4 text-slate-400">Horizontal RC bands at 1/3 and 2/3 height (2-10 φ bars)</td>
                         <td className="py-3 px-4 font-mono text-emerald-400">Included in finishing/masonry</td>
                         <td className="py-3 px-4 text-center">
                           <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded text-[10px] font-bold">
@@ -2408,7 +2407,7 @@ EOF`;
                             COMPLIANT
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-slate-400">Section 3.3–3.5: Isolated pad footing 1.5×1.5m, tm=350mm.</td>
+                        <td className="py-3 px-4 text-slate-400">Section 3.3–3.5: Isolated pad footing 1.5×1.5 m, tm=350 mm.</td>
                       </tr>
                     </tbody>
                   </table>
@@ -2763,7 +2762,7 @@ EOF`;
                     <h4 className="text-sm font-bold text-slate-100">Project Engineering Parameters</h4>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Global parameters including standard wall height ({currentProject.standardWallHeight}m), wall thicknesses (0.23m / 0.115m), wastage allowance, and currency are centralized in Settings.
+                    Global parameters including standard wall height ({currentProject.standardWallHeight}m), wall thicknesses (0.23 m / 0.115 m), wastage allowance, and currency are centralized in Settings.
                   </p>
                 </div>
                 <button
@@ -4086,7 +4085,7 @@ EOF`;
                                 <span className="text-slate-600">|</span>
                                 <div className="flex items-center space-x-1">
                                   <div className="w-8 h-1 bg-amber-400 rounded-sm" />
-                                  <span className="text-amber-400 font-bold">5m</span>
+                                  <span className="text-amber-400 font-bold">5 m</span>
                                 </div>
                               </div>
 
@@ -4632,36 +4631,7 @@ EOF`;
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button
-                        onClick={() => {
-                          const blob = new Blob([SAMPLE_CAD_DXF_STRING], { type: 'application/dxf' });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = 'structest_standard_villa.dxf';
-                          document.body.appendChild(a);
-                          a.click();
-                          document.body.removeChild(a);
-                          URL.revokeObjectURL(url);
-                        }}
-                        className="bg-slate-900 hover:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-xl text-xs font-bold transition border border-slate-700 whitespace-nowrap flex items-center space-x-1.5"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Download DXF Template</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setImportedFileName('sample_residential_villa.dxf');
-                          handleParseDxfContent(SAMPLE_CAD_DXF_STRING);
-                        }}
-                        className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow whitespace-nowrap flex items-center space-x-1.5"
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Load Sample Villa DXF</span>
-                      </button>
-                    </div>
+                    //
                   </div>
 
                   {/* Feature Highlights Grid */}
@@ -5482,7 +5452,7 @@ EOF`;
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Brickwork in Superstructure 230mm thick (1:6)"
+                  placeholder="e.g. Brickwork in Superstructure 230 mm thick (1:6)"
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-500"
@@ -5871,4 +5841,10 @@ EOF`;
 function useAuth() {
   throw new Error('Function not implemented.');
 }
+
+
+
+
+
+
 
